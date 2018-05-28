@@ -24,15 +24,28 @@ function getStrings(expressionsArray) {
 
 function goClicked() {
   var expression = document.getElementById("expression").value;
-  var parsed = parseExpression(expression);
-  displayPreview(parsed);
+  try{
+    var parsed = parseExpression(expression);
+    console.log(parsed);
+    displayPreview(parsed);
+  } catch (errorMsg) {
+    displayPreview(errorMsg);
+    return;
+  }
+}
+function Variable(string){
+  this.expressionType = "VARIABLE";
+  this.variableName = string;
+}
+Variable.prototype.toString = function() {
+  return this.variableName;
 }
 function NotExpression(expression){
   this.expressionType = "NOT";
   this.expression = expression;
 }
 NotExpression.prototype.toString = function() {
-  return "(not " + this.expression.toString() + ")";
+  return "(" + NOT_EXPRESSIONS[0] + this.expression.toString() + ")";
 };
 function AndExpression(sub1, sub2){
   this.expressionType = "AND";
@@ -40,7 +53,7 @@ function AndExpression(sub1, sub2){
   this.expression2 = sub2;
 }
 AndExpression.prototype.toString = function() {
-  return "(" + this.expression1.toString() + " and " + this.expression2.toString() + ")";
+  return "(" + this.expression1.toString() + AND_EXPRESSIONS[0] + this.expression2.toString() + ")";
 };
 function OrExpression(sub1, sub2){
   this.expressionType = "OR";
@@ -48,5 +61,29 @@ function OrExpression(sub1, sub2){
   this.expression2 = sub2;
 }
 OrExpression.prototype.toString = function() {
-  return "(" + this.expression1.toString() + " or " + this.expression2.toString() + ")";
+  return "(" + this.expression1.toString() + OR_EXPRESSIONS[0] + this.expression2.toString() + ")";
 };
+function XorExpression(sub1, sub2){
+  this.expressionType = "XOR";
+  this.expression1 = sub1;
+  this.expression2 = sub2;
+}
+XorExpression.prototype.toString = function() {
+  return "(" + this.expression1.toString() + XOR_EXPRESSIONS[0] + this.expression2.toString() + ")";
+}
+function IfExpression(sub1, sub2){
+  this.expressionType = "IF";
+  this.expression1 = sub1;
+  this.expression2 = sub2;
+}
+IfExpression.prototype.toString = function() {
+  return "(" + this.expression1.toString() + IF_EXPRESSIONS[0] + this.expression2.toString() + ")";
+}
+function IffExpression(sub1, sub2){
+  this.expressionType = "IFF";
+  this.expression1 = sub1;
+  this.expression2 = sub2;
+}
+IffExpression.prototype.toString = function() {
+  return "(" + this.expression1.toString() + IFF_EXPRESSIONS[0] + this.expression2.toString() + ")";
+}
