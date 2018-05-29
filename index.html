@@ -8,6 +8,7 @@
     <script src="main.js"></script>
     <script src="parser.js"></script>
     <script src="display.js"></script>
+    <script src="variable.js"></script>
   </head>
   <body>
     <div class="container">
@@ -17,20 +18,23 @@
       </div>
       <div class="row" id="input">
         <div class="input-group">
-          <input type="text" class="form-control" placeholder="" id="expression">
+          <input type="text" class="form-control" placeholder="" id="expression" oninput="expressionChanged();">
           <button type="button" class="btn btn-primary" onclick="goClicked();" id="buttonSimplify">Go!</button>
           <button type="button" class="btn" data-toggle="modal" data-target="#helpModal">Help</button>
         </div>
       </div>
       <div class="row">
-        <div class="card card-body bg-light text-center" id="preview">Preview...</div>
+        <div class="card card-body bg-light text-center">
+          <div id="preview">Preview...</div>
+          <div id="variablePreview"></div>
+        </div>
       </div>
       <!-- Modal -->
       <div class="modal fade" id="helpModal" role="dialog">
         <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Help</h5>
+        <h5 class="modal-title" id="helpModalLabel">Help</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>

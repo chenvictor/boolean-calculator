@@ -23,15 +23,37 @@ function getStrings(expressionsArray) {
 }
 
 function goClicked() {
+  if (isParsed) {
+    alert("Will simplify the expression: " + parsedResult);
+  } else {
+    alert("Nothing parsed yet!!!");
+  }
+}
+
+var wto;
+var isParsed = false;
+var parsedResult;
+function beginParse() {
   var expression = document.getElementById("expression").value;
   try{
-    var parsed = parseExpression(expression);
-    console.log(parsed);
-    displayPreview(parsed);
+    parsedResult = parseExpression(expression);
+    console.log(parsedResult);
+    displayPreview(parsedResult);
+    displayVariables(variables);
+    isParsed = true;
   } catch (errorMsg) {
     displayPreview(errorMsg);
-    return;
+    displayVariables();
   }
+}
+function expressionChanged() {
+  isParsed = false;
+  displayPreview("Preview...");
+  displayVariables();
+  clearTimeout(wto);
+  wto = setTimeout(function() {
+    beginParse();
+  }, 500);
 }
 function Variable(string){
   this.expressionType = "VARIABLE";
@@ -45,7 +67,7 @@ function NotExpression(expression){
   this.expression = expression;
 }
 NotExpression.prototype.toString = function() {
-  return "(" + NOT_EXPRESSIONS[0] + this.expression.toString() + ")";
+  return NOT_EXPRESSIONS[0] + parenthesize(this.expression.toString(), !isVariable(this.expression) && this.expression.expressionType != "NOT");
 };
 function AndExpression(sub1, sub2){
   this.expressionType = "AND";
@@ -53,7 +75,9 @@ function AndExpression(sub1, sub2){
   this.expression2 = sub2;
 }
 AndExpression.prototype.toString = function() {
-  return "(" + this.expression1.toString() + AND_EXPRESSIONS[0] + this.expression2.toString() + ")";
+  return parenthesize(this.expression1.toString(), !isVariable(this.expression1) && this.expression1.expressionType != "AND" && this.expression1.expressionType != "NOT") +
+  AND_EXPRESSIONS[0]
+  + parenthesize(this.expression2.toString(), !isVariable(this.expression2) && this.expression2.expressionType != "AND" && this.expression2.expressionType != "NOT");
 };
 function OrExpression(sub1, sub2){
   this.expressionType = "OR";
@@ -61,7 +85,9 @@ function OrExpression(sub1, sub2){
   this.expression2 = sub2;
 }
 OrExpression.prototype.toString = function() {
-  return "(" + this.expression1.toString() + OR_EXPRESSIONS[0] + this.expression2.toString() + ")";
+  return parenthesize(this.expression1.toString(), !isVariable(this.expression1) && this.expression1.expressionType != "OR" && this.expression1.expressionType != "NOT") +
+  OR_EXPRESSIONS[0]
+  + parenthesize(this.expression2.toString(), !isVariable(this.expression2) && this.expression2.expressionType != "OR" && this.expression2.expressionType != "NOT");
 };
 function XorExpression(sub1, sub2){
   this.expressionType = "XOR";
@@ -69,7 +95,9 @@ function XorExpression(sub1, sub2){
   this.expression2 = sub2;
 }
 XorExpression.prototype.toString = function() {
-  return "(" + this.expression1.toString() + XOR_EXPRESSIONS[0] + this.expression2.toString() + ")";
+  return parenthesize(this.expression1.toString(), !isVariable(this.expression1) && this.expression1.expressionType != "XOR" && this.expression1.expressionType != "NOT") +
+  XOR_EXPRESSIONS[0]
+  + parenthesize(this.expression2.toString(), !isVariable(this.expression2) && this.expression2.expressionType != "XOR" && this.expression2.expressionType != "NOT");
 }
 function IfExpression(sub1, sub2){
   this.expressionType = "IF";
@@ -77,7 +105,9 @@ function IfExpression(sub1, sub2){
   this.expression2 = sub2;
 }
 IfExpression.prototype.toString = function() {
-  return "(" + this.expression1.toString() + IF_EXPRESSIONS[0] + this.expression2.toString() + ")";
+  return parenthesize(this.expression1.toString(), !isVariable(this.expression1) && this.expression1.expressionType != "IF" && this.expression1.expressionType != "NOT") +
+  IF_EXPRESSIONS[0]
+  + parenthesize(this.expression2.toString(), !isVariable(this.expression2) && this.expression2.expressionType != "IF" && this.expression2.expressionType != "NOT");
 }
 function IffExpression(sub1, sub2){
   this.expressionType = "IFF";
@@ -85,5 +115,20 @@ function IffExpression(sub1, sub2){
   this.expression2 = sub2;
 }
 IffExpression.prototype.toString = function() {
-  return "(" + this.expression1.toString() + IFF_EXPRESSIONS[0] + this.expression2.toString() + ")";
+  return parenthesize(this.expression1.toString(), !isVariable(this.expression1) && this.expression1.expressionType != "IFF" && this.expression1.expressionType != "NOT") +
+  IFF_EXPRESSIONS[0]
+  + parenthesize(this.expression2.toString(), !isVariable(this.expression2) && this.expression2.expressionType != "IFF" && this.expression2.expressionType != "NOT");
 }
+function isVariable(exp) {
+  return exp.expressionType == "VARIABLE";
+}
+function parenthesize(string, temp = true) {
+  if (OVERRIDE_PARENS) {
+    temp = true;
+  }
+  if (temp) {
+    return "(" + string + ")";
+  }
+  return string;
+}
+var OVERRIDE_PARENS = false;
