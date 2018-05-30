@@ -35,7 +35,7 @@ var parsedResult;
 function beginParse(expression) {
   try {
     parsedResult = Parser.parse(expression);
-    Display.preview(parsedResult);
+    Display.preview("Preview: " + parsedResult);
     Display.variables(VariableManager.getVariables());
     Display.setGoButtonEnabled(); //set it to true as parsing was successful
   } catch (errorMsg) {

@@ -1,85 +1,76 @@
+//Unary Expressions
+
 function Variable(string) {
-  this.expressionType = "VARIABLE";
   this.variableName = string;
+  VariableManager.addVariable(this);
 }
 Variable.prototype.toString = function() {
   return this.variableName;
 }
 
-function NotExpression(expression) {
-  this.expressionType = "NOT";
-  this.expression = expression;
+function NotExpression(sub) {
+  this.sub = sub;
 }
 NotExpression.prototype.toString = function() {
-  return SYMBOL.NOT + parenthesize(this.expression.toString(), !isVariable(this.expression) && this.expression.expressionType != "NOT");
+  return SYMBOL.NOT + Utils.parenthesize(this.sub.toString(), !isVariable(this.sub));
 };
 
-function AndExpression(sub1, sub2) {
-  this.expressionType = "AND";
-  this.expression1 = sub1;
-  this.expression2 = sub2;
+//Binary Expressions
+
+function BinaryAndExpression(sub1, sub2) {
+  this.sub1 = sub1;
+  this.sub2 = sub2;
 }
-AndExpression.prototype.toString = function() {
-  return parenthesize(this.expression1.toString(), !isVariable(this.expression1) && this.expression1.expressionType != "AND" && this.expression1.expressionType != "NOT") +
+BinaryAndExpression.prototype.toString = function() {
+  return Utils.parenthesize(this.sub1.toString(), !isVariable(this.sub1)) +
     SYMBOL.AND +
-    parenthesize(this.expression2.toString(), !isVariable(this.expression2) && this.expression2.expressionType != "AND" && this.expression2.expressionType != "NOT");
+    Utils.parenthesize(this.sub2.toString(), !isVariable(this.sub2));
 };
 
-function OrExpression(sub1, sub2) {
-  this.expressionType = "OR";
-  this.expression1 = sub1;
-  this.expression2 = sub2;
+function AndExpression(subArray) {
+  this.subs = subArray;
 }
-OrExpression.prototype.toString = function() {
-  return parenthesize(this.expression1.toString(), !isVariable(this.expression1) && this.expression1.expressionType != "OR" && this.expression1.expressionType != "NOT") +
+
+function BinaryOrExpression(sub1, sub2) {
+  this.sub1 = sub1;
+  this.sub2 = sub2;
+}
+BinaryOrExpression.prototype.toString = function() {
+  return Utils.parenthesize(this.sub1.toString(), !isVariable(this.sub1)) +
     SYMBOL.OR +
-    parenthesize(this.expression2.toString(), !isVariable(this.expression2) && this.expression2.expressionType != "OR" && this.expression2.expressionType != "NOT");
+    Utils.parenthesize(this.sub2.toString(), !isVariable(this.sub2));
 };
 
 function XorExpression(sub1, sub2) {
-  this.expressionType = "XOR";
-  this.expression1 = sub1;
-  this.expression2 = sub2;
+  this.sub1 = sub1;
+  this.sub2 = sub2;
 }
 XorExpression.prototype.toString = function() {
-  return parenthesize(this.expression1.toString(), !isVariable(this.expression1) && this.expression1.expressionType != "XOR" && this.expression1.expressionType != "NOT") +
+  return Utils.parenthesize(this.sub1.toString(), !isVariable(this.sub1)) +
     SYMBOL.XOR +
-    parenthesize(this.expression2.toString(), !isVariable(this.expression2) && this.expression2.expressionType != "XOR" && this.expression2.expressionType != "NOT");
+    Utils.parenthesize(this.sub2.toString(), !isVariable(this.sub2));
 }
 
 function IfExpression(sub1, sub2) {
-  this.expressionType = "IF";
-  this.expression1 = sub1;
-  this.expression2 = sub2;
+  this.sub1 = sub1;
+  this.sub2 = sub2;
 }
 IfExpression.prototype.toString = function() {
-  return parenthesize(this.expression1.toString(), !isVariable(this.expression1) && this.expression1.expressionType != "IF" && this.expression1.expressionType != "NOT") +
+  return Utils.parenthesize(this.sub1.toString(), !isVariable(this.sub1)) +
     SYMBOL.IF +
-    parenthesize(this.expression2.toString(), !isVariable(this.expression2) && this.expression2.expressionType != "IF" && this.expression2.expressionType != "NOT");
+    Utils.Utils.parenthesize(this.sub2.toString(), !isVariable(this.sub2));
 }
 
 function IffExpression(sub1, sub2) {
-  this.expressionType = "IFF";
-  this.expression1 = sub1;
-  this.expression2 = sub2;
+  this.sub1 = sub1;
+  this.sub2 = sub2;
 }
 IffExpression.prototype.toString = function() {
-  return parenthesize(this.expression1.toString(), !isVariable(this.expression1) && this.expression1.expressionType != "IFF" && this.expression1.expressionType != "NOT") +
+  return Utils.Utils.parenthesize(this.sub1.toString(), !isVariable(this.sub1)) +
     SYMBOL.IFF +
-    parenthesize(this.expression2.toString(), !isVariable(this.expression2) && this.expression2.expressionType != "IFF" && this.expression2.expressionType != "NOT");
+    Utils.Utils.parenthesize(this.sub2.toString(), !isVariable(this.sub2));
 }
 
 function isVariable(exp) {
-  return exp.expressionType == "VARIABLE";
+  return exp instanceof Variable;
 }
-
-function parenthesize(string, temp = true) {
-  if (OVERRIDE_PARENS) {
-    temp = true;
-  }
-  if (temp) {
-    return "(" + string + ")";
-  }
-  return string;
-}
-var OVERRIDE_PARENS = false;

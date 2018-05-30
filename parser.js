@@ -153,9 +153,9 @@ var Parser = new function() {
           case AND_EXPRESSIONS[0]:
             return new AndExpression(processParsedArray(preBinary), processParsedArray(postBinary));
           case OR_EXPRESSIONS[0]:
-            return new OrExpression(processParsedArray(preBinary), processParsedArray(postBinary));
+            return new BinaryOrExpression(processParsedArray(preBinary), processParsedArray(postBinary));
           case XOR_EXPRESSIONS[0]:
-            return new XorExpression(processParsedArray(preBinary), processParsedArray(postBinary));
+            return new BinaryXorExpression(processParsedArray(preBinary), processParsedArray(postBinary));
           case IF_EXPRESSIONS[0]:
             return new IfExpression(processParsedArray(preBinary), processParsedArray(postBinary));
           case IFF_EXPRESSIONS[0]:
@@ -174,9 +174,7 @@ var Parser = new function() {
       if (isBinaryOperator(single) || single == NOT_EXPRESSIONS[0]) {
         throw "Parsing error. Unfinished expression";
       }
-      var newVar = new Variable(single);
-      VariableManager.addVariable(newVar);
-      return newVar;
+      return new Variable(single);
     } else {
       return processParsedArray(parseAgain);
     }

@@ -1,18 +1,30 @@
-<html>
+<!doctype html>
+<html lang="en">
 
 <head>
-  <title>Boolean Calculator - With Steps!</title>
+
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
-  <script src="main.js?v=1.0"></script>
-  <script src="constants.js?v=1.0"></script>
-  <script src="settings.js?v=1.0"></script>
-  <script src="expression.js?v=1.0"></script>
-  <script src="parser.js?v=1.0"></script>
-  <script src="display.js?v=1.0"></script>
-  <script src="variable.js?v=1.0"></script>
+  <!-- Glyphicon CSS -->
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <!-- Overriding CSS -->
+  <style>
+    .unlink {
+      text-decoration: none;
+      color: black;
+    }
+
+    .unlink:hover {
+      text-decoration: none;
+      color: black;
+    }
+  </style>
+
+  <title>Boolean Calculator - With Steps!</title>
 </head>
 
 <body>
@@ -26,6 +38,9 @@
         <input type="text" class="form-control" placeholder="" id="expression" oninput="expressionChanged();">
         <button type="button" class="btn btn-primary" onclick="goClicked();" id="buttonSimplify" disabled>Go!</button>
         <button type="button" class="btn" data-toggle="modal" data-target="#helpModal">Help</button>
+        <button type="button" class="btn" data-toggle="modal" data-target="#settingsModal">
+          <span class="fa fa-cog"></span>
+        </button>
       </div>
     </div>
     <div class="row">
@@ -34,7 +49,8 @@
         <div id="variablePreview"></div>
       </div>
     </div>
-    <!-- Modal -->
+    <!-- Modals -->
+    <!-- Help Modal -->
     <div class="modal fade" id="helpModal" role="dialog">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -49,8 +65,8 @@
             <table class="expressions">
               <thead>
                 <tr>
-                  <th scope="col">Expression</th>
-                  <th scope="col">Equivalents</th>
+                  <th scope="col" class="pr-3">Expression</th>
+                  <th scope="col" class="pr-3">Equivalents</th>
                 </tr>
               </thead>
               <tbody>
@@ -88,7 +104,151 @@
         </div>
       </div>
     </div>
+
+    <!-- Settings Modal -->
+    <div class="modal fade" id="settingsModal" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="helpModalLabel">Settings</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+          </div>
+          <div class="modal-body">
+            The following rules are applied by the calculator
+            <table class="expressions">
+              <thead>
+                <tr>
+                  <th scope="col" class="pr-3">Rule</th>
+                  <th scope="col" class="pr-3">
+                    <a href="#" class="unlink" data-toggle="tooltip" title="'Accepted' abbreviation">Short</a>
+                  </th>
+                  <th scope="col" class="pr-3">
+                    <a href="#" class="unlink" data-toggle="tooltip" title="Display short form of the rule when showing steps.">Short?</a>
+                  </th>
+                  <th scope="col" class="pr-3">
+                    <a href="#" class="unlink" data-toggle="tooltip" title="Skip showing this step in calculations?">Skip?</a>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td scope="row">Commutative</td>
+                  <td>COM</td>
+                  <td><input type="checkbox" value=""></td>
+                  <td><input type="checkbox" value=""></td>
+                </tr>
+                <tr>
+                  <td scope="row">Associative</td>
+                  <td>ASS</td>
+                  <td><input type="checkbox" value=""></td>
+                  <td><input type="checkbox" value=""></td>
+                </tr>
+                <tr>
+                  <td scope="row">Distributive</td>
+                  <td>DIST</td>
+                  <td><input type="checkbox" value=""></td>
+                  <td><input type="checkbox" value=""></td>
+                </tr>
+                <tr>
+                  <td scope="row">Identity</td>
+                  <td>I</td>
+                  <td><input type="checkbox" value=""></td>
+                  <td><input type="checkbox" value=""></td>
+                </tr>
+                <tr>
+                  <td scope="row">Negation</td>
+                  <td>NEG</td>
+                  <td><input type="checkbox" value=""></td>
+                  <td><input type="checkbox" value=""></td>
+                </tr>
+                <tr>
+                  <td scope="row">Double Negation</td>
+                  <td>DNEG</td>
+                  <td><input type="checkbox" value=""></td>
+                  <td><input type="checkbox" value=""></td>
+                </tr>
+                <tr>
+                  <td scope="row">Idempotent</td>
+                  <td>ID</td>
+                  <td><input type="checkbox" value=""></td>
+                  <td><input type="checkbox" value=""></td>
+                </tr>
+                <tr>
+                  <td scope="row">Universal Bound</td>
+                  <td>UB</td>
+                  <td><input type="checkbox" value=""></td>
+                  <td><input type="checkbox" value=""></td>
+                </tr>
+                <tr>
+                  <td scope="row">De Morgan's</td>
+                  <td>DM</td>
+                  <td><input type="checkbox" value=""></td>
+                  <td><input type="checkbox" value=""></td>
+                </tr>
+                <tr>
+                  <td scope="row">Absorption</td>
+                  <td>ABS</td>
+                  <td><input type="checkbox" value=""></td>
+                  <td><input type="checkbox" value=""></td>
+                </tr>
+                <tr>
+                  <td scope="row">Negations of T and F</td>
+                  <td>NTF</td>
+                  <td><input type="checkbox" value=""></td>
+                  <td><input type="checkbox" value=""></td>
+                </tr>
+                <tr>
+                  <td scope="row">Implication</td>
+                  <td>IMP</td>
+                  <td><input type="checkbox" value=""></td>
+                  <td><input type="checkbox" value=""></td>
+                </tr>
+                <tr>
+                  <td scope="row">Exclusive Or</td>
+                  <td>XOR</td>
+                  <td><input type="checkbox" value=""></td>
+                  <td><input type="checkbox" value=""></td>
+                </tr>
+                <tr>
+                  <td colspan="2" scope="row">Select all?</td>
+                  <td><input type="checkbox" value=""></td>
+                  <td><input type="checkbox" value=""></td>
+                </tr>
+              </tbody>
+            </table>
+            <hr> Local Equivalency Laws from <a href="https://www.ugrad.cs.ubc.ca/~cs121/2018S/handouts/formulasheet.pdf" target="_blank">Dave's Formula Sheet</a>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+
+  <!-- Other JS -->
+  <script src="main.js?v=1.1"></script>
+  <script src="constants.js?v=1.0"></script>
+  <script src="settings.js?v=1.0"></script>
+  <script src="expression.js?v=1.1"></script>
+  <script src="parser.js?v=1.1"></script>
+  <script src="display.js?v=1.0"></script>
+  <script src="variable.js?v=1.0"></script>
+  <script src="utils.js?v=1.1"></script>
+  <!-- Enable Tooltips -->
+  <script>
+    $(document).ready(function() {
+      $('[data-toggle="tooltip"]').tooltip();
+    });
+  </script>
+
 </body>
 
 </html>
