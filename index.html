@@ -123,7 +123,7 @@
                   <th scope="col" class="pr-3">Rule</th>
                   <th scope="col" class="pr-3">
                     <a href="#" class="unlink" data-toggle="tooltip" title="'Accepted' abbreviation">Short</a>
-                    <input type="checkbox" data-toggle="tooltip" title="Use abbreviations instead of full names." value="">
+                    <input type="checkbox" data-toggle="tooltip" title="Use abbreviations instead of full names." id="short" onclick="Settings.toggleCheckbox(this)">
                   </th>
                   <th scope="col" class="pr-3">
                     <a href="#" class="unlink" data-toggle="tooltip" title="Skip showing this step in calculations?">Skip?</a>
@@ -134,77 +134,79 @@
                 <tr>
                   <td scope="row">Commutative</td>
                   <td>COM</td>
-                  <td><input type="checkbox" value=""></td>
+                  <td><input type="checkbox" id="com" onclick="Settings.toggleCheckbox(this)"></td>
                 </tr>
                 <tr>
                   <td scope="row">Associative</td>
                   <td>ASS</td>
-                  <td><input type="checkbox" value=""></td>
+                  <td><input type="checkbox" id="ass" onclick="Settings.toggleCheckbox(this)"></td>
                 </tr>
                 <tr>
                   <td scope="row">Distributive</td>
-                  <td>DIST</td>\
-                  <td><input type="checkbox" value=""></td>
+                  <td>DIST</td>
+                  <td><input type="checkbox" id="dist" onclick="Settings.toggleCheckbox(this)"></td>
                 </tr>
                 <tr>
                   <td scope="row">Identity</td>
                   <td>I</td>
-                  <td><input type="checkbox" value=""></td>
+                  <td><input type="checkbox" id="i" onclick="Settings.toggleCheckbox(this)"></td>
                 </tr>
                 <tr>
                   <td scope="row">Negation</td>
                   <td>NEG</td>
-                  <td><input type="checkbox" value=""></td>
+                  <td><input type="checkbox" id="neg" onclick="Settings.toggleCheckbox(this)"></td>
                 </tr>
                 <tr>
                   <td scope="row">Double Negation</td>
                   <td>DNEG</td>
-                  <td><input type="checkbox" value=""></td>
+                  <td><input type="checkbox" id="dneg" onclick="Settings.toggleCheckbox(this)"></td>
                 </tr>
                 <tr>
                   <td scope="row">Idempotent</td>
                   <td>ID</td>
-                  <td><input type="checkbox" value=""></td>
+                  <td><input type="checkbox" id="id" onclick="Settings.toggleCheckbox(this)"></td>
                 </tr>
                 <tr>
                   <td scope="row">Universal Bound</td>
                   <td>UB</td>
-                  <td><input type="checkbox" value=""></td>
+                  <td><input type="checkbox" id="ub" onclick="Settings.toggleCheckbox(this)"></td>
                 </tr>
                 <tr>
                   <td scope="row">De Morgan's</td>
                   <td>DM</td>
-                  <td><input type="checkbox" value=""></td>
+                  <td><input type="checkbox" id="dm" onclick="Settings.toggleCheckbox(this)"></td>
                 </tr>
                 <tr>
                   <td scope="row">Absorption</td>
                   <td>ABS</td>
-                  <td><input type="checkbox" value=""></td>
+                  <td><input type="checkbox" id="abs" onclick="Settings.toggleCheckbox(this)"></td>
                 </tr>
                 <tr>
                   <td scope="row">Negations of T and F</td>
                   <td>NTF</td>
-                  <td><input type="checkbox" value=""></td>
+                  <td><input type="checkbox" id="ntf" onclick="Settings.toggleCheckbox(this)"></td>
                 </tr>
                 <tr>
                   <td scope="row">Implication</td>
                   <td>IMP</td>
-                  <td><input type="checkbox" value=""></td>
+                  <td><input type="checkbox" id="imp" onclick="Settings.toggleCheckbox(this)"></td>
                 </tr>
                 <tr>
                   <td scope="row">Exclusive Or</td>
                   <td>XOR</td>
-                  <td><input type="checkbox" value=""></td>
+                  <td><input type="checkbox" id="xor" onclick="Settings.toggleCheckbox(this)"></td>
                 </tr>
                 <tr>
                   <td colspan="2" scope="row">Select all?</td>
-                  <td><input type="checkbox" value=""></td>
+                  <td><input type="checkbox" id="selectAll" onclick="Settings.toggleCheckbox(this);"></td>
                 </tr>
               </tbody>
             </table>
           </div>
           <div class="modal-footer">
             Local Equivalency Laws from &nbsp;<a href="https://www.ugrad.cs.ubc.ca/~cs121/2018S/handouts/formulasheet.pdf" target="_blank">Dave's Formula Sheet</a>
+
+            <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="Settings.save()">Save</button>
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
           </div>
         </div>
