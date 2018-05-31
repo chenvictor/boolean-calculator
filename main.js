@@ -4,7 +4,7 @@ window.addEventListener("load", function() {
     var EXPRESSION_SPACER = "  ";
     var string = "";
     for (var i = 0; i < expressionsArray.length; i++) {
-      string += expressionsArray[i] + EXPRESSION_SPACER;
+      string += expressionsArray[i].replace(/\\/g, '') + EXPRESSION_SPACER;
     }
     return string;
   }

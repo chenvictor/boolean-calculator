@@ -1,4 +1,4 @@
-var Display = new function() {
+const Display = new function() {
 
   this.resetPreview = function() {
     this.setGoButtonEnabled(false);

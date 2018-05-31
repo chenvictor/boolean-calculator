@@ -1,4 +1,4 @@
-VariableManager = new function() {
+const VariableManager = new function() {
   var variables = [];
 
   this.addVariable = function(varName) {

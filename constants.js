@@ -1,5 +1,5 @@
 //Contains all global constants used.
-var SYMBOL = {
+const SYMBOL = {
   NOT: "¬",
   AND: "∧",
   OR: "∨",

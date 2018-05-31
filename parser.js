@@ -1,8 +1,8 @@
-var Parser = new function() {
+const Parser = new function() {
   //Equivalents for expressions
   var NOT_EXPRESSIONS = [SYMBOL.NOT, "~", "-", "!", "not"];
-  var AND_EXPRESSIONS = [SYMBOL.AND, "and"];
-  var OR_EXPRESSIONS = [SYMBOL.OR, "or"];
+  var AND_EXPRESSIONS = [SYMBOL.AND, "and", "\\^"];
+  var OR_EXPRESSIONS = [SYMBOL.OR, "or", "v"];
   var XOR_EXPRESSIONS = [SYMBOL.XOR, "xor"];
   var IF_EXPRESSIONS = [SYMBOL.IF, "->", "then"];
   var IFF_EXPRESSIONS = [SYMBOL.IFF, "<->"];
@@ -151,11 +151,11 @@ var Parser = new function() {
         var postBinary = array.slice(index + 1);
         switch (array[index]) {
           case AND_EXPRESSIONS[0]:
-            return new AndExpression(processParsedArray(preBinary), processParsedArray(postBinary));
+            return new BinaryAndExpression(processParsedArray(preBinary), processParsedArray(postBinary));
           case OR_EXPRESSIONS[0]:
             return new BinaryOrExpression(processParsedArray(preBinary), processParsedArray(postBinary));
           case XOR_EXPRESSIONS[0]:
-            return new BinaryXorExpression(processParsedArray(preBinary), processParsedArray(postBinary));
+            return new XorExpression(processParsedArray(preBinary), processParsedArray(postBinary));
           case IF_EXPRESSIONS[0]:
             return new IfExpression(processParsedArray(preBinary), processParsedArray(postBinary));
           case IFF_EXPRESSIONS[0]:
@@ -184,6 +184,7 @@ var Parser = new function() {
   var isBinaryOperator = function(exp) {
     for (var idx = 0; idx < BINARY_EXPRESSIONS.length; idx++) {
       if (BINARY_EXPRESSIONS[idx] == exp) {
+        console.log("true");
         return true;
       }
     }
@@ -191,7 +192,7 @@ var Parser = new function() {
   }
 
   var isAssociativeOperator = function(exp) {
-    return exp == AND_EXPRESSIONS[0] || exp == OR_EXPRESSIONS[0];
+    return exp == AND_EXPRESSIONS[0] || exp == OR_EXPRESSIONS[0] || exp == XOR_EXPRESSIONS[0];
   }
 
   var invalidParentheses = function(expression) {

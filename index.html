@@ -96,7 +96,7 @@
                 </tr>
               </tbody>
             </table>
-            <hr> T and F and reserved for Tautology and Contradiction. Any other variable names can be used.
+            <hr> In addition to the symbols above, T and F and reserved for Tautology and Contradiction. Any other variable names can be used.
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -115,7 +115,7 @@
           <span aria-hidden="true">&times;</span>
         </button>
           </div>
-          <div class="modal-body">
+          <div class="modal-body" style="height:300px; overflow-y: auto;">
             The following rules are applied by the calculator
             <table class="expressions">
               <thead>
@@ -123,9 +123,7 @@
                   <th scope="col" class="pr-3">Rule</th>
                   <th scope="col" class="pr-3">
                     <a href="#" class="unlink" data-toggle="tooltip" title="'Accepted' abbreviation">Short</a>
-                  </th>
-                  <th scope="col" class="pr-3">
-                    <a href="#" class="unlink" data-toggle="tooltip" title="Display short form of the rule when showing steps.">Short?</a>
+                    <input type="checkbox" data-toggle="tooltip" title="Use abbreviations instead of full names." value="">
                   </th>
                   <th scope="col" class="pr-3">
                     <a href="#" class="unlink" data-toggle="tooltip" title="Skip showing this step in calculations?">Skip?</a>
@@ -137,90 +135,76 @@
                   <td scope="row">Commutative</td>
                   <td>COM</td>
                   <td><input type="checkbox" value=""></td>
-                  <td><input type="checkbox" value=""></td>
                 </tr>
                 <tr>
                   <td scope="row">Associative</td>
                   <td>ASS</td>
                   <td><input type="checkbox" value=""></td>
-                  <td><input type="checkbox" value=""></td>
                 </tr>
                 <tr>
                   <td scope="row">Distributive</td>
-                  <td>DIST</td>
-                  <td><input type="checkbox" value=""></td>
+                  <td>DIST</td>\
                   <td><input type="checkbox" value=""></td>
                 </tr>
                 <tr>
                   <td scope="row">Identity</td>
                   <td>I</td>
                   <td><input type="checkbox" value=""></td>
-                  <td><input type="checkbox" value=""></td>
                 </tr>
                 <tr>
                   <td scope="row">Negation</td>
                   <td>NEG</td>
-                  <td><input type="checkbox" value=""></td>
                   <td><input type="checkbox" value=""></td>
                 </tr>
                 <tr>
                   <td scope="row">Double Negation</td>
                   <td>DNEG</td>
                   <td><input type="checkbox" value=""></td>
-                  <td><input type="checkbox" value=""></td>
                 </tr>
                 <tr>
                   <td scope="row">Idempotent</td>
                   <td>ID</td>
-                  <td><input type="checkbox" value=""></td>
                   <td><input type="checkbox" value=""></td>
                 </tr>
                 <tr>
                   <td scope="row">Universal Bound</td>
                   <td>UB</td>
                   <td><input type="checkbox" value=""></td>
-                  <td><input type="checkbox" value=""></td>
                 </tr>
                 <tr>
                   <td scope="row">De Morgan's</td>
                   <td>DM</td>
-                  <td><input type="checkbox" value=""></td>
                   <td><input type="checkbox" value=""></td>
                 </tr>
                 <tr>
                   <td scope="row">Absorption</td>
                   <td>ABS</td>
                   <td><input type="checkbox" value=""></td>
-                  <td><input type="checkbox" value=""></td>
                 </tr>
                 <tr>
                   <td scope="row">Negations of T and F</td>
                   <td>NTF</td>
-                  <td><input type="checkbox" value=""></td>
                   <td><input type="checkbox" value=""></td>
                 </tr>
                 <tr>
                   <td scope="row">Implication</td>
                   <td>IMP</td>
                   <td><input type="checkbox" value=""></td>
-                  <td><input type="checkbox" value=""></td>
                 </tr>
                 <tr>
                   <td scope="row">Exclusive Or</td>
                   <td>XOR</td>
                   <td><input type="checkbox" value=""></td>
-                  <td><input type="checkbox" value=""></td>
                 </tr>
                 <tr>
                   <td colspan="2" scope="row">Select all?</td>
                   <td><input type="checkbox" value=""></td>
-                  <td><input type="checkbox" value=""></td>
                 </tr>
               </tbody>
             </table>
-            <hr> Local Equivalency Laws from <a href="https://www.ugrad.cs.ubc.ca/~cs121/2018S/handouts/formulasheet.pdf" target="_blank">Dave's Formula Sheet</a>
           </div>
           <div class="modal-footer">
+            Local Equivalency Laws from &nbsp;<a href="https://www.ugrad.cs.ubc.ca/~cs121/2018S/handouts/formulasheet.pdf" target="_blank">Dave's Formula Sheet</a>
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
           </div>
         </div>
@@ -235,12 +219,12 @@
 
   <!-- Other JS -->
   <script src="main.js?v=1.1"></script>
-  <script src="constants.js?v=1.0"></script>
-  <script src="settings.js?v=1.0"></script>
-  <script src="expression.js?v=1.1"></script>
-  <script src="parser.js?v=1.1"></script>
-  <script src="display.js?v=1.0"></script>
-  <script src="variable.js?v=1.0"></script>
+  <script src="constants.js?v=1.1"></script>
+  <script src="settings.js?v=1.1"></script>
+  <script src="expression.js?v=1.2"></script>
+  <script src="parser.js?v=1.2"></script>
+  <script src="display.js?v=1.1"></script>
+  <script src="variable.js?v=1.1"></script>
   <script src="utils.js?v=1.1"></script>
   <!-- Enable Tooltips -->
   <script>

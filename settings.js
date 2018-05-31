@@ -1,4 +1,4 @@
-var Settings = new function() {
+const Settings = new function() {
   var forceParens = true;
   this.getForceParens = function() {
     return forceParens;
