@@ -60,7 +60,7 @@ function OrExpression(subs) {
 }
 
 OrExpression.prototype.toString = function() {
-  return Utils.parenthesize(arrayToString(this.subs, SYMBOL.OR));
+  return Utils.parenthesize(Utils.arrayToString(this.subs, SYMBOL.OR));
 }
 
 function AndExpression(subs) {
@@ -68,20 +68,5 @@ function AndExpression(subs) {
 }
 
 AndExpression.prototype.toString = function() {
-  return Utils.parenthesize(arrayToString(this.subs, SYMBOL.AND));
-}
-
-function arrayToString(array, separator) {
-  //returns string representation of array with the given separator
-  var string = "";
-  for (var i = 0; i < array.length; i++) {
-    var item = array[i];
-    if (i == 0) {
-      string += item;
-    } else {
-      first = true;
-      string += (separator + item);
-    }
-  }
-  return string;
+  return Utils.parenthesize(Utils.arrayToString(this.subs, SYMBOL.AND));
 }
