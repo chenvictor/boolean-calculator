@@ -151,9 +151,9 @@ const Parser = new function() {
         var postBinary = array.slice(index + 1);
         switch (array[index]) {
           case AND_EXPRESSIONS[0]:
-            return new BinaryAndExpression(processParsedArray(preBinary), processParsedArray(postBinary));
+            return processAndExpression(array);
           case OR_EXPRESSIONS[0]:
-            return new BinaryOrExpression(processParsedArray(preBinary), processParsedArray(postBinary));
+            return processOrExpression(array);
           case XOR_EXPRESSIONS[0]:
             return new XorExpression(processParsedArray(preBinary), processParsedArray(postBinary));
           case IF_EXPRESSIONS[0]:
@@ -178,6 +178,52 @@ const Parser = new function() {
     } else {
       return processParsedArray(parseAgain);
     }
+  }
+
+  var processOrExpression = function(array) {
+    return processAssociativeExpression(array, SYMBOL.OR, OrExpression);
+  }
+
+  var processAndExpression = function(array) {
+    return processAssociativeExpression(array, SYMBOL.AND, AndExpression);
+  }
+
+  var processAssociativeExpression = function(array, symbol, construct) {
+    //add an extra symbol and the end for parsing processParsedArray
+    array.push(symbol);
+    //check for nots
+    var newArray = [];
+    var tempNot = [];
+    var counter = 0;
+    var pushed;
+    for (var i = 0; i < array.length; i++) {
+      pushed = false;
+      if (array[i] == SYMBOL.NOT) {
+        //start a not, or continue, doesn't matter
+        tempNot.push(array[i]);
+        pushed = true;
+      } else {
+        counter++;
+      }
+      if (array[i] == symbol) {
+        if (tempNot.length != 0) {
+          newArray.push(processParsedArray(tempNot));
+          tempNot = [];
+        }
+        if (counter % 2 == 1) {
+          throw "Parsing error. Unfinished expression";
+        }
+      } else {
+        if (tempNot.length == 0) {
+          newArray.push(processParsedSingle(array[i]));
+        } else {
+          if (!pushed) {
+            tempNot.push(array[i]);
+          }
+        }
+      }
+    }
+    return new construct(newArray);
   }
 
   //Smaller helper methods

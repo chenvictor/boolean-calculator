@@ -22,12 +22,8 @@ function commutative(expression) {
 }
 
 function associative(expression) {
-  //turn binary and/or into regular
-  if (expression instanceof BinaryAndExpression) {
-    return expression.asAndExpression();
-  } else if (expression instanceof BinaryOrExpression) {
-    return expression.asOrExpression();
-  }
+  //merged nested or/and expressions
+
   //doesn't apply
   return false;
 }
