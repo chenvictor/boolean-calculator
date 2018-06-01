@@ -1,8 +1,43 @@
-function applyLaw(lawFunction) {
+function applyLaw(expression, lawFunction) {
   //traverses the expression, applying the law wherever possible.
   //if applied, return the new expressions
   //otherwise, return false
-
+  var applied = lawFunction(expression);
+  if (applied != false) {
+    console.log("applied");
+    var applyAgain = applyLaw(applied, lawFunction);
+    if (applyAgain == false) {
+      return applied;
+    }
+    return applyAgain;
+    //try again
+  } else {
+    var subs = expression.subs;
+    if (subs == null) {
+      return false;
+      //not more to try
+    } else {
+      //try on the subs
+      var newSubs = [];
+      var didApply = false;
+      for (var i = 0; i < subs.length; i++) {
+        console.log("trying to apply to " + subs[i]);
+        var subApplied = applyLaw(subs[i], lawFunction);
+        if (subApplied != false) {
+          newSubs.push(subApplied);
+          didApply = true;
+        } else {
+          newSubs.push(subs[i]);
+        }
+      }
+      if (didApply) {
+        return new expression.constructor(newSubs);
+      } else {
+        console.log("couldn't apply to subs");
+        return false;
+      }
+    }
+  }
 }
 
 //These functions should not alter the original expressions, but copy data over.
@@ -23,15 +58,47 @@ function commutative(expression) {
 
 function associative(expression) {
   //merged nested or/and expressions
-
+  if (expression instanceof AndExpression) {
+    //check for nested And
+    var newSubs = associate(expression.subs, AndExpression);
+    if (newSubs.length == expression.subs.length) {
+      //same
+      return false;
+    }
+    return new AndExpression(newSubs);
+  } else if (expression instanceof OrExpression) {
+    //check for nested Or
+    var newSubs = associate(expression.subs, OrExpression);
+    if (newSubs.length == expression.subs.length) {
+      //same
+      return false;
+    }
+    return new OrExpression(newSubs);
+  }
   //doesn't apply
   return false;
 }
 
+//Helper function for associative
+function associate(subs, type) {
+  //subs to check, types to merge, return array
+  var array = [];
+  for (var i = 0; i < subs.length; i++) {
+    var sub = subs[i];
+    if (sub instanceof type) {
+      array = array.concat(associate(sub.subs, type));
+    } else {
+      //diff type
+      array.push(sub);
+    }
+  }
+  return array;
+}
+
 function doubleNegation(expression) {
   if (expression instanceof NotExpression) {
-    if (expression.sub instanceof NotExpression) {
-      return expression.sub.sub;
+    if (expression.subs[0] instanceof NotExpression) {
+      return expression.subs[0].subs[0];
     }
   }
   //couldn't double negate
