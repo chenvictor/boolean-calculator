@@ -174,7 +174,7 @@ const Parser = new function() {
       if (isBinaryOperator(single) || single == NOT_EXPRESSIONS[0]) {
         throw "Parsing error. Unfinished expression";
       }
-      return new Variable(single);
+      return VariableManager.get(single);
     } else {
       return processParsedArray(parseAgain);
     }
@@ -184,7 +184,6 @@ const Parser = new function() {
   var isBinaryOperator = function(exp) {
     for (var idx = 0; idx < BINARY_EXPRESSIONS.length; idx++) {
       if (BINARY_EXPRESSIONS[idx] == exp) {
-        console.log("true");
         return true;
       }
     }

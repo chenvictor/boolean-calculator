@@ -1,18 +1,23 @@
 const VariableManager = new function() {
   var variables = [];
 
-  this.addVariable = function(varName) {
-    if (varName.variableName == "T" || varName.variableName == "F") {
-      return;
+  this.get = function(varName) {
+    if (varName == "T") {
+      return True;
+    } else if (varName == "F") {
+      return False;
     }
     if (!this.hasVariable(varName)) {
-      variables.push(varName);
+      var newVar = new Variable(varName);
+      variables.push(newVar);
+      return newVar;
     }
   }
 
   this.hasVariable = function(varName) {
+    //return if variable with given name exists
     for (var i = 0; i < variables.length; i++) {
-      if (varName.variableName == variables[i].variableName) {
+      if (varName == variables[i].variableName) {
         return true;
       }
     }

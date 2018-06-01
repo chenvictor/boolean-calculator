@@ -49,7 +49,6 @@ const Settings = new function() {
     }
   };
   var sync = function() {
-    console.log("Syncing storage and ui");
     //set checkboxes to match dict
     for (var key in checkBoxDict) {
       document.getElementById(key).checked = checkBoxDict[key];
