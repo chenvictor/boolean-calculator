@@ -24,6 +24,9 @@ const Display = new function() {
       btn.setAttribute("disabled", "true");
     }
   }
+  this.output = function(output) {
+    display(output, "tempOutput");
+  }
   //Helper methods
   var display = function(text, elementId) {
     document.getElementById(elementId).innerHTML = text;

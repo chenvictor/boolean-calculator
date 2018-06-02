@@ -7,11 +7,14 @@ const VariableManager = new function() {
     } else if (varName == "F") {
       return False;
     }
-    if (!this.hasVariable(varName)) {
-      var newVar = new Variable(varName);
-      variables.push(newVar);
-      return newVar;
+    for (var i = 0; i < variables.length; i++) {
+      if (varName == variables[i].variableName) {
+        return variables[i];
+      }
     }
+    var newVar = new Variable(varName);
+    variables.push(newVar);
+    return newVar;
   }
 
   this.hasVariable = function(varName) {

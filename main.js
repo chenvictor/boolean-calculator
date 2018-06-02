@@ -26,7 +26,9 @@ function goClicked() {
   if (isGoButtonEnabled()) {
     alert("Will simplify the expression: " + parsedResult);
     console.log(parsedResult);
-    console.log(applyLaw(parsedResult, doubleNegation));
+    var applied = applyLawOnce(parsedResult, implication);
+    console.log(applied);
+    Display.output(applied);
   }
 }
 
