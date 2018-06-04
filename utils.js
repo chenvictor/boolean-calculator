@@ -1,4 +1,32 @@
 const Utils = new function() {
+  var longDict = {
+    commutative: "Commutative",
+    associative: "Associative",
+    distributive: "Distributive",
+    identity: "Identity",
+    negation: "Negation",
+    doubleNegation: "Double Negation",
+    idempotent: "Idempotent",
+    universalBound: "Universal Bound",
+    deMorgans: "De Morgan's",
+    absorption: "Absorption",
+    negationsOfTF: "Negations of T and F",
+    implication: "Implication"
+  };
+  var shortDict = {
+    commutative: "COM",
+    associative: "ASS",
+    distributive: "DIST",
+    identity: "I",
+    negation: "NEG",
+    doubleNegation: "DNEG",
+    idempotent: "ID",
+    universalBound: "UB",
+    deMorgans: "DM",
+    absorption: "ABS",
+    negationsOfTF: "NTF",
+    implication: "IMP"
+  };
   this.parenthesize = function(string, temp = true) {
     if (temp) {
       return "(" + string + ")";
@@ -19,5 +47,12 @@ const Utils = new function() {
       }
     }
     return string;
+  }
+  this.getLawName = function(lawFunction) {
+    var dictToUse = longDict;
+    if (Settings.getValue("short")) {
+      dictToUse = shortDict;
+    }
+    return dictToUse[lawFunction.name];
   }
 };

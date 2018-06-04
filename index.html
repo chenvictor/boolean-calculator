@@ -33,6 +33,7 @@
     <div class="row" id="header">
       <h3>Simplify the Propositional Logic Statement...</h3>
     </div>
+    <!-- Input area -->
     <div class="row" id="input">
       <div class="input-group">
         <input type="text" class="form-control" placeholder="" id="expression" oninput="expressionChanged();">
@@ -43,12 +44,35 @@
         </button>
       </div>
     </div>
+    <!-- Preview Area -->
     <div class="row">
       <div class="card card-body bg-light text-center">
         <div id="preview">Preview...</div>
         <div id="variablePreview"></div>
-        <div id="tempOutput"></div>
       </div>
+    </div>
+    <div class="collapse" id="collapseOutput">
+      <!-- Steps Area -->
+      <div class="row card">
+        <div>
+          <div id="numSteps" class="float-left text-center p-2">0 Steps</div>
+          <button class="btn btn-secondary float-right" type="button" data-toggle="collapse" data-target="#collapseSteps" aria-expanded="false" aria-controls="collapseSteps">
+            <span class="fa fa-caret-down" style="font-size: 14px;"></span>
+        </button>
+        </div>
+      </div>
+      <!-- Output Area -->
+      <div class="collapse" id="collapseSteps" class="card">
+        <ul class="list-group text-right" id="listSteps">
+        </ul>
+      </div>
+      <!-- Final Answer -->
+      <div class="row">
+        <div class="card card-body bg-light text-center">
+          <div id="result">Test 3</div>
+        </div>
+      </div>
+
     </div>
     <!-- Modals -->
     <!-- Help Modal -->
@@ -221,15 +245,15 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
 
   <!-- Other JS -->
-  <script src="main.js?v=1.3"></script>
+  <script src="main.js?v=1.4"></script>
   <script src="constants.js?v=1.2"></script>
   <script src="settings.js?v=1.2"></script>
-  <script src="equivalency.js?v=1.2"></script>
-  <script src="expression.js?v=1.5"></script>
+  <script src="equivalency.js?v=1.3"></script>
+  <script src="expression.js?v=1.6"></script>
   <script src="parser.js?v=1.3"></script>
-  <script src="display.js?v=1.2"></script>
+  <script src="display.js?v=1.3"></script>
   <script src="variable.js?v=1.3"></script>
-  <script src="utils.js?v=1.2"></script>
+  <script src="utils.js?v=1.3"></script>
   <!-- Enable Tooltips -->
   <script>
     $(document).ready(function() {

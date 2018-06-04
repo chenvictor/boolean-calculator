@@ -1,11 +1,54 @@
+const EquivalencyLaws = [
+  //simplification
+  identity,
+  doubleNegation,
+  negationsOfTF,
+  universalBound,
+  idempotent,
+  //rewriting
+  implication,
+  commutative,
+  //expansion
+  associative,
+  deMorgans,
+  distributive
+];
+
+function Step(expression, law) {
+  this.result = expression;
+  this.lawString = law;
+}
+
+function simplify(expression) {
+  var steps = [];
+  var current = expression;
+  //first steps
+  steps.push(new Step(expression, ""));
+  //first step
+  for (var i = 0; i < EquivalencyLaws.length; i++) {
+    var law = EquivalencyLaws[i];
+    var attempt = applyLawOnce(current, law);
+    if (attempt == false) {
+      continue;
+    }
+    current = attempt;
+    steps.push(new Step(current.toString(), "by " + Utils.getLawName(law)));
+    //success, start at beginning again
+    i = -1; //-1 to reset to 0 after ++
+  }
+  //as simple as possible
+  return steps;
+}
+
 function applyLawOnce(expression, lawFunction) {
   //traverses the expression, applying the law wherever possible.
   //if applied, return the new expressions
   //otherwise, return false
+  //console.log("Applying " + Utils.getLawName(lawFunction) + " on " + expression);
   var applied = lawFunction(expression);
+  //console.log("Applied result " + applied);
   if (applied != false) {
     return applied;
-    //try again
   } else {
     var subs = expression.subs;
     if (subs == null) {
@@ -39,14 +82,23 @@ function applyLawOnce(expression, lawFunction) {
 //These functions should not alter the original expressions, but copy data over.
 
 function commutative(expression) {
+  //return false;
   //sort or or and expression
   if (expression instanceof OrExpression) {
     //sort the subs alphabetically
-    return new OrExpression(expression.subs.sort(customSort));
+    var newSubs = expression.subs.concat().sort(customSort);
+    if (newSubs.toString() == expression.subs.toString()) {
+      return false;
+    }
+    return new OrExpression(newSubs);
   }
   if (expression instanceof AndExpression) {
     //sort the subs alphabetically
-    return new AndExpression(expression.subs.sort(customSort));
+    var newSubs = expression.subs.concat().sort(customSort);
+    if (newSubs.toString() == expression.subs.toString()) {
+      return false;
+    }
+    return new AndExpression(newSubs);
   }
   //doesn't apply
   return false;
@@ -160,6 +212,7 @@ function identity(expression) {
       return new type(newSubs);
     }
   }
+  return false;
 }
 
 function negation(expression) {
@@ -178,8 +231,34 @@ function doubleNegation(expression) {
 }
 
 function idempotent(expression) {
-  //TODO
-  return false;
+  var type;
+  if (expression instanceof OrExpression) {
+    type = OrExpression;
+  } else if (expression instanceof AndExpression) {
+    type = AndExpression;
+  } else {
+    return false;
+  }
+  //assumes the array is sorted
+  var newArray = [];
+  var changed = false;
+  for (var i = 0; i < expression.subs.length; i++) {
+    var sub = expression.subs[i];
+    if (newArray.length == 0 || !newArray[newArray.length - 1].equals(sub)) {
+      newArray.push(sub);
+    } else {
+      changed = true;
+      // newArray = newArray.concat(expression.subs.splice(i + 1));
+      // break;
+    }
+  }
+  if (changed == false) {
+    return false;
+  }
+  if (newArray.length == 1) {
+    return newArray[0];
+  }
+  return new type(newArray);
 }
 
 function universalBound(expression) {
@@ -209,13 +288,11 @@ function deMorgans(expression) {
       for (var i = 0; i < sub.subs.length; i++) {
         newSubs.push(new NotExpression(sub.subs[i]));
       }
-      console.log(newSubs);
       return new AndExpression(newSubs);
     } else if (sub instanceof AndExpression) {
       for (var i = 0; i < sub.subs.length; i++) {
         newSubs.push(new NotExpression(sub.subs[i]));
       }
-      console.log(newSubs);
       return new OrExpression(newSubs);
     }
   }
@@ -223,7 +300,60 @@ function deMorgans(expression) {
 }
 
 function absorption(expression) {
-
+  var type;
+  var innerType;
+  if (expression instanceof OrExpression) {
+    type = OrExpression;
+    innerType = AndExpression;
+  } else if (expression instanceof AndExpression) {
+    type = AndExpression;
+    innerType = OrExpression;
+  } else {
+    return false;
+  }
+  //find other expressions
+  var others = [];
+  for (var i = 0; i < expression.subs.length; i++) {
+    var sub = expression.subs[i];
+    if (sub instanceof innerType) {
+      others.push(sub);
+    }
+  }
+  console.log("Others: " + others);
+  //
+  if (others.length == 0) {
+    //no others means nothing to simplify
+    return false;
+  }
+  var toRemove = [];
+  //for all the others, if they contain one of the original array elements, don't include them
+  for (var i = 0; i < others.length; i++) {
+    var other = others[i];
+    for (var j = 0; j < other.subs.length; j++) {
+      var inner = other.subs[j];
+      if (expression.contains(inner)) {
+        toRemove.push(other);
+        break;
+      }
+    }
+  }
+  var newArray = [];
+  var changed = false;
+  for (var i = 0; i < expression.subs.length; i++) {
+    var sub = expression.subs[i];
+    if (!toRemove.includes(sub)) {
+      newArray.push(sub);
+    }
+    changed = true;
+  }
+  console.log("checking changed");
+  if (!changed) {
+    return false;
+  }
+  if (newArray.length == 1) {
+    return newArray[0];
+  }
+  return new type(newArray);
 }
 
 function implication(expression) {
@@ -249,18 +379,25 @@ function negationsOfTF(expression) {
 
 function customSort(expA, expB) {
   //if both variables, alphabetical
-  if (expA instanceof Variable) {
-    if (expB instanceof Variable) {
-      return expA.variableName < expB.variableName;
-    } else {
-      return -1; //only A is variable, A first
-    }
+  // if (expA instanceof Variable) {
+  //   if (expB instanceof Variable) {
+  //     return expA.variableName < expB.variableName;
+  //   } else {
+  //     return -1; //only A is variable, A first
+  //   }
+  // } else {
+  //   if (expB instanceof Variable) {
+  //     return 1; //only B is variable, B first
+  //   } else {
+  //     //neither are variable, temp don't care
+  //     return 0;
+  //   }
+  // }
+  if (expA.toString() < expB.toString()) {
+    return -1;
+  } else if (expA.toString() > expB.toString()) {
+    return 1;
   } else {
-    if (expB instanceof Variable) {
-      return 1; //only B is variable, B first
-    } else {
-      //neither are variable, temp don't care
-      return 0;
-    }
+    return 0;
   }
 }

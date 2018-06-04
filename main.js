@@ -24,11 +24,19 @@ window.addEventListener("load", function() {
 
 function goClicked() {
   if (isGoButtonEnabled()) {
-    alert("Will simplify the expression: " + parsedResult);
-    console.log(parsedResult);
-    var applied = applyLawOnce(parsedResult, implication);
-    console.log(applied);
-    Display.output(applied);
+    Display.clearSteps();
+    var steps = simplify(parsedResult);
+    if (steps.length == 0) {
+      //nothing was done
+      Display.setResult(parsedResult);
+      return;
+    }
+    for (var i = 0; i < steps.length; i++) {
+      var step = steps[i];
+      Display.addStep(step.result.toString(), step.lawString);
+    }
+    Display.setResult(steps[steps.length - 1].result);
+    Display.setOutputVisible();
   }
 }
 
@@ -48,6 +56,7 @@ function beginParse(expression) {
 }
 
 function expressionChanged() {
+  Display.setOutputVisible(false);
   Display.resetPreview();
   clearTimeout(wto);
   wto = setTimeout(function() {
