@@ -117,7 +117,6 @@ OrExpression.prototype.toString = function() {
   return Utils.parenthesize(Utils.arrayToString(this.subs, SYMBOL.OR));
 }
 OrExpression.prototype.contains = function(object) {
-  console.log(this + " contains " + object + "?");
   if (object.constructor != this.constructor) {
     return this.subs.includes(object);
   }
@@ -136,8 +135,7 @@ OrExpression.prototype.equals = function(object) {
   if (this.subs.length != object.subs.length) {
     return false;
   }
-  //TODO: check all elements equals, does not have to be in order though
-  return true;
+  return this.toString() == object.toString();
 }
 
 function AndExpression(subs) {
@@ -166,6 +164,7 @@ AndExpression.prototype.equals = function(object) {
   if (this.subs.length != object.subs.length) {
     return false;
   }
-  //TODO: check all elements equals, does not have to be in order though
-  return true;
+  //assume elements are in order
+  return this.toString() == object.toString();
+  //return false;
 }

@@ -68,7 +68,9 @@ const Display = new function() {
   var setNumSteps = function(numSteps = 0) {
     this.numSteps = numSteps;
     //update Display
-    display(this.numSteps + (numSteps == 1 ? " Step" : " Steps"), "numSteps");
+    display(this.numSteps +
+      (numSteps == 1 ? " Step" : " Steps"),
+      "numSteps");
   }
 
   //Helper methods

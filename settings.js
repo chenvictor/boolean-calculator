@@ -24,6 +24,10 @@ const Settings = new function() {
     return checkBoxDict[key];
   }
 
+  this.skipLaw = function(law) {
+    return checkBoxDict[Utils.getLawName(law, true).toLowerCase()];
+  }
+
   var checkBoxDict = {
     short: true,
     com: true,

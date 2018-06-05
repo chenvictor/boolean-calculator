@@ -5,13 +5,14 @@ const EquivalencyLaws = [
   negationsOfTF,
   universalBound,
   idempotent,
+  absorption,
+  associative,
+  //expansion
+  deMorgans,
   //rewriting
   implication,
-  commutative,
-  //expansion
-  associative,
-  deMorgans,
-  distributive
+  commutative
+  //distributive
 ];
 
 function Step(expression, law) {
@@ -22,31 +23,30 @@ function Step(expression, law) {
 function simplify(expression) {
   var steps = [];
   var current = expression;
-  //first steps
-  steps.push(new Step(expression, ""));
-  //first step
   for (var i = 0; i < EquivalencyLaws.length; i++) {
     var law = EquivalencyLaws[i];
     var attempt = applyLawOnce(current, law);
+    console.log("Law: " + Utils.getLawName(law, true) + current + " -> " + attempt);
     if (attempt == false) {
       continue;
     }
     current = attempt;
-    steps.push(new Step(current.toString(), "by " + Utils.getLawName(law)));
+    if (!Settings.skipLaw(law)) {
+      steps.push(new Step(current.toString(), "by " + Utils.getLawName(law)));
+    }
     //success, start at beginning again
     i = -1; //-1 to reset to 0 after ++
   }
+  steps.push(new Step(current.toString(), "result"));
   //as simple as possible
   return steps;
 }
 
 function applyLawOnce(expression, lawFunction) {
-  //traverses the expression, applying the law wherever possible.
-  //if applied, return the new expressions
-  //otherwise, return false
-  //console.log("Applying " + Utils.getLawName(lawFunction) + " on " + expression);
+  if (expression instanceof Array) {
+    expression = expression[0];
+  }
   var applied = lawFunction(expression);
-  //console.log("Applied result " + applied);
   if (applied != false) {
     return applied;
   } else {
@@ -84,24 +84,24 @@ function applyLawOnce(expression, lawFunction) {
 function commutative(expression) {
   //return false;
   //sort or or and expression
+  var type;
   if (expression instanceof OrExpression) {
-    //sort the subs alphabetically
-    var newSubs = expression.subs.concat().sort(customSort);
-    if (newSubs.toString() == expression.subs.toString()) {
-      return false;
-    }
-    return new OrExpression(newSubs);
+    type = OrExpression;
+  } else if (expression instanceof AndExpression) {
+    type = AndExpression;
+  } else {
+    //doesn't apply
+    return false;
   }
-  if (expression instanceof AndExpression) {
-    //sort the subs alphabetically
-    var newSubs = expression.subs.concat().sort(customSort);
-    if (newSubs.toString() == expression.subs.toString()) {
-      return false;
-    }
-    return new AndExpression(newSubs);
+  var newSubs = expression.subs.concat().sort(customSort);
+  if (newSubs.toString() == expression.subs.toString()) {
+    return false;
   }
-  //doesn't apply
-  return false;
+  var returnVal = new type(newSubs);
+  if (returnVal instanceof Array) {
+    throw "eror comm"
+  }
+  return returnVal;
 }
 
 function associative(expression) {
@@ -319,7 +319,6 @@ function absorption(expression) {
       others.push(sub);
     }
   }
-  console.log("Others: " + others);
   //
   if (others.length == 0) {
     //no others means nothing to simplify
@@ -346,7 +345,6 @@ function absorption(expression) {
     }
     changed = true;
   }
-  console.log("checking changed");
   if (!changed) {
     return false;
   }

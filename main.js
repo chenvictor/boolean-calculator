@@ -29,9 +29,10 @@ function goClicked() {
     if (steps.length == 0) {
       //nothing was done
       Display.setResult(parsedResult);
+      Display.setOutputVisible();
       return;
     }
-    for (var i = 0; i < steps.length; i++) {
+    for (var i = 0; i < steps.length - 1; i++) {
       var step = steps[i];
       Display.addStep(step.result.toString(), step.lawString);
     }

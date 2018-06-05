@@ -48,9 +48,9 @@ const Utils = new function() {
     }
     return string;
   }
-  this.getLawName = function(lawFunction) {
+  this.getLawName = function(lawFunction, useShort = Settings.getValue("short")) {
     var dictToUse = longDict;
-    if (Settings.getValue("short")) {
+    if (useShort) {
       dictToUse = shortDict;
     }
     return dictToUse[lawFunction.name];
