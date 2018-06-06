@@ -1,19 +1,24 @@
-const EquivalencyLaws = [
-  //simplification
-  identity,
-  doubleNegation,
-  negationsOfTF,
-  universalBound,
-  idempotent,
-  absorption,
-  associative,
-  //expansion
-  deMorgans,
-  //rewriting
-  implication,
-  commutative
-  //distributive
-];
+// const EquivalencyLaws = [
+//   //Simplification Laws
+//   identity,
+//   negation,
+//   doubleNegation,
+//   negationsOfTF,
+//   universalBound,
+//   idempotent,
+//   absorption,
+//   associative,
+//   //Rewriting Laws
+//   implication,
+//   exclusiveOr,
+//   commutative,
+//   //Expansion Laws
+//   deMorgans,
+//   distributive
+// ];
+const EquivalencyLaws = [identity];
+
+const TIMEOUT_STEPS = 250;
 
 function Step(expression, law) {
   this.result = expression;
@@ -21,8 +26,10 @@ function Step(expression, law) {
 }
 
 function simplify(expression) {
+
   var steps = [];
   var current = expression;
+  var stepsCount = 0;
   for (var i = 0; i < EquivalencyLaws.length; i++) {
     var law = EquivalencyLaws[i];
     var attempt = applyLawOnce(current, law);
@@ -36,6 +43,10 @@ function simplify(expression) {
     }
     //success, start at beginning again
     i = -1; //-1 to reset to 0 after ++
+    if (stepsCount++ > TIMEOUT_STEPS) {
+      throw "Simplification timed out!";
+      alert("Simplification timed out!");
+    }
   }
   steps.push(new Step(current.toString(), "result"));
   //as simple as possible
@@ -376,26 +387,22 @@ function negationsOfTF(expression) {
 //Helper functions
 
 function customSort(expA, expB) {
-  //if both variables, alphabetical
-  // if (expA instanceof Variable) {
-  //   if (expB instanceof Variable) {
-  //     return expA.variableName < expB.variableName;
-  //   } else {
-  //     return -1; //only A is variable, A first
-  //   }
-  // } else {
-  //   if (expB instanceof Variable) {
-  //     return 1; //only B is variable, B first
-  //   } else {
-  //     //neither are variable, temp don't care
-  //     return 0;
-  //   }
-  // }
-  if (expA.toString() < expB.toString()) {
+  var stringA = expA.toString();
+  var stringB = expB.toString();
+  //shorter string first
+  if (stringA.length < stringB.length) {
     return -1;
-  } else if (expA.toString() > expB.toString()) {
+  } else if (stringB.length < stringA.length) {
     return 1;
   } else {
-    return 0;
+    //same length, compare alphabet
+    if (stringA < stringB) {
+      return -1;
+    } else if (stringA > stringB) {
+      return 1;
+    } else {
+      return 0;
+    }
   }
+
 }
