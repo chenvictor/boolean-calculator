@@ -142,7 +142,7 @@ const Parser = new function() {
       if (index == -1) {
         //there is no binary operator, must be a collection of nots
         if (array.shift() == NOT_EXPRESSIONS[0]) {
-          return new NotExpression(processParsedArray(array));
+          return new NotExpression([processParsedArray(array)]);
         } else {
           throw "Parsing error. Unfinished expression";
         }

@@ -11,7 +11,8 @@ const Utils = new function() {
     deMorgans: "De Morgan's",
     absorption: "Absorption",
     negationsOfTF: "Negations of T and F",
-    implication: "Implication"
+    implication: "Implication",
+    exclusiveOr: "Exclusive Or"
   };
   var shortDict = {
     commutative: "COM",
@@ -25,7 +26,8 @@ const Utils = new function() {
     deMorgans: "DM",
     absorption: "ABS",
     negationsOfTF: "NTF",
-    implication: "IMP"
+    implication: "IMP",
+    exclusiveOr: "XOR"
   };
   this.parenthesize = function(string, temp = true) {
     if (temp) {

@@ -1,24 +1,23 @@
-// const EquivalencyLaws = [
-//   //Simplification Laws
-//   identity,
-//   negation,
-//   doubleNegation,
-//   negationsOfTF,
-//   universalBound,
-//   idempotent,
-//   absorption,
-//   associative,
-//   //Rewriting Laws
-//   implication,
-//   exclusiveOr,
-//   commutative,
-//   //Expansion Laws
-//   deMorgans,
-//   distributive
-// ];
-const EquivalencyLaws = [identity];
+const EquivalencyLaws = [
+  //Simplification Laws
+  identity,
+  negation,
+  doubleNegation,
+  negationsOfTF,
+  universalBound,
+  idempotent,
+  absorption,
+  associative,
+  //Rewriting Laws
+  implication,
+  exclusiveOr,
+  commutative,
+  //Expansion Laws
+  deMorgans,
+  distributive
+];
 
-const TIMEOUT_STEPS = 250;
+const TIMEOUT_STEPS = 100;
 
 function Step(expression, law) {
   this.result = expression;
@@ -32,18 +31,26 @@ function simplify(expression) {
   var stepsCount = 0;
   for (var i = 0; i < EquivalencyLaws.length; i++) {
     var law = EquivalencyLaws[i];
+    //console.log("Law: " + Utils.getLawName(law, true));
     var attempt = applyLawOnce(current, law);
-    console.log("Law: " + Utils.getLawName(law, true) + current + " -> " + attempt);
     if (attempt == false) {
       continue;
     }
+    //console.log("    " + current + " -> " + attempt);
     current = attempt;
     if (!Settings.skipLaw(law)) {
       steps.push(new Step(current.toString(), "by " + Utils.getLawName(law)));
     }
     //success, start at beginning again
     i = -1; //-1 to reset to 0 after ++
-    if (stepsCount++ > TIMEOUT_STEPS) {
+    if (++stepsCount > TIMEOUT_STEPS) {
+      //after TIMEOUT_STEPS successful attempts, abort, taking too long
+      //log all steps
+      console.log("Timed out after steps(" + stepsCount + "):");
+      // for (var i = 0; i < steps.length; i++) {
+      //   console.log(steps[i]);
+      // }
+
       throw "Simplification timed out!";
       alert("Simplification timed out!");
     }
@@ -55,10 +62,13 @@ function simplify(expression) {
 
 function applyLawOnce(expression, lawFunction) {
   if (expression instanceof Array) {
-    expression = expression[0];
+    throw "Unexpected array";
   }
   var applied = lawFunction(expression);
   if (applied != false) {
+    if (applied instanceof Array) {
+      throw "Unexpected array";
+    }
     return applied;
   } else {
     var subs = expression.subs;
@@ -78,6 +88,9 @@ function applyLawOnce(expression, lawFunction) {
           didApply = true;
           break;
         } else {
+          if (subApplied instanceof Array) {
+            throw "Unexpected array";
+          }
           newSubs.push(subs[i]);
         }
       }
@@ -93,7 +106,6 @@ function applyLawOnce(expression, lawFunction) {
 //These functions should not alter the original expressions, but copy data over.
 
 function commutative(expression) {
-  //return false;
   //sort or or and expression
   var type;
   if (expression instanceof OrExpression) {
@@ -167,7 +179,15 @@ function distributive(expression) {
     //doesn't apply
     return false;
   }
+  if (expression.subs.length > 3) {
+    //don't distribute if expression is long already
+    return false;
+  }
   var idx = distributiveHelper(expression.subs, opposite);
+  if (idx == false) {
+    //all opposite expression
+    return false;
+  }
   if (idx == -1) {
     return false;
     //no or
@@ -187,12 +207,22 @@ function distributive(expression) {
 function distributiveHelper(subs, searchFor) {
   //return index of the first instance of searchFor
   //if none exists, return -1;
+  var allSearchFors = true;
+  var index = -1;
   for (var i = 0; i < subs.length; i++) {
     if (subs[i] instanceof searchFor) {
-      return i;
+      if (index == -1) {
+        index = i;
+      }
+    } else {
+      allSearchFors = false;
     }
   }
-  return -1;
+  if (allSearchFors) {
+    //don't distribute
+    return false;
+  }
+  return index;
 }
 
 function identity(expression) {
@@ -227,7 +257,37 @@ function identity(expression) {
 }
 
 function negation(expression) {
-  //TODO
+  //if an or expression contains p and not p, replace with trues
+  var replacement;
+  if (expression instanceof OrExpression) {
+    replacement = True;
+  } else if (expression instanceof AndExpression) {
+    replacement = False;
+  } else {
+    return false;
+  }
+  var notNots = [];
+  for (var i = 0; i < expression.subs.length; i++) {
+    var sub = expression.subs[i];
+    if (sub instanceof NotExpression) {
+      var inner = sub.subs[0];
+      if (notNots.includes(inner)) {
+        return replacement;
+      }
+    } else {
+      notNots.push(sub);
+    }
+  }
+  //2nd pass through, since negation might occur before notnot
+  for (var i = 0; i < expression.subs.length; i++) {
+    var sub = expression.subs[i];
+    if (sub instanceof NotExpression) {
+      var inner = sub.subs[0];
+      if (notNots.includes(inner)) {
+        return replacement;
+      }
+    }
+  }
   return false;
 }
 
@@ -297,12 +357,12 @@ function deMorgans(expression) {
     var newSubs = [];
     if (sub instanceof OrExpression) {
       for (var i = 0; i < sub.subs.length; i++) {
-        newSubs.push(new NotExpression(sub.subs[i]));
+        newSubs.push(new NotExpression([sub.subs[i]]));
       }
       return new AndExpression(newSubs);
     } else if (sub instanceof AndExpression) {
       for (var i = 0; i < sub.subs.length; i++) {
-        newSubs.push(new NotExpression(sub.subs[i]));
+        newSubs.push(new NotExpression([sub.subs[i]]));
       }
       return new OrExpression(newSubs);
     }
@@ -353,8 +413,9 @@ function absorption(expression) {
     var sub = expression.subs[i];
     if (!toRemove.includes(sub)) {
       newArray.push(sub);
+    } else {
+      changed = true;
     }
-    changed = true;
   }
   if (!changed) {
     return false;
@@ -367,7 +428,7 @@ function absorption(expression) {
 
 function implication(expression) {
   if (expression instanceof IfExpression) {
-    return new OrExpression([new NotExpression(expression.subs[0]), expression.subs[1]]);
+    return new OrExpression([new NotExpression([expression.subs[0]]), expression.subs[1]]);
   }
   return false;
 }
@@ -384,11 +445,33 @@ function negationsOfTF(expression) {
   return false;
 }
 
+function exclusiveOr(expression) {
+  if (expression instanceof XorExpression) {
+    var sub1 = expression.subs[0];
+    var sub2 = expression.subs[1];
+    //P xor Q == P^-Q or -P^Q
+    return new OrExpression(
+      [new AndExpression([sub1, new NotExpression([sub2])]),
+        new AndExpression([new NotExpression([sub1]), sub2])
+      ]
+    );
+  }
+  //doesn't apply
+  return false;
+}
+
 //Helper functions
 
 function customSort(expA, expB) {
   var stringA = expA.toString();
   var stringB = expB.toString();
+  //ignore negation
+  if (stringA.charAt(0) == SYMBOL.NOT) {
+    stringA = stringA.substr(1);
+  }
+  if (stringB.charAt(0) == SYMBOL.NOT) {
+    stringB = stringB.substr(1);
+  }
   //shorter string first
   if (stringA.length < stringB.length) {
     return -1;

@@ -45,14 +45,14 @@ function isVariable(exp) {
   return exp instanceof Variable;
 }
 
-function NotExpression(sub) {
-  this.subs = [sub];
+function NotExpression(subs) {
+  this.subs = subs;
 }
 NotExpression.prototype.toString = function() {
   return SYMBOL.NOT + this.subs[0];
 };
 NotExpression.prototype.equals = function(object) {
-  if (object.constructor != this.constructor) {
+  if (!(object instanceof NotExpression)) {
     return false;
   }
   return this.subs[0].equals(object.subs[0]);
@@ -67,7 +67,7 @@ XorExpression.prototype.toString = function() {
   return Utils.parenthesize(this.subs[0] + SYMBOL.XOR + this.subs[1]);
 }
 XorExpression.prototype.equals = function(object) {
-  if (object.constructor != this.constructor) {
+  if (!(object instanceof XorExpression)) {
     return false;
   }
   if (!this.subs[0].equals(object.subs[0])) {
@@ -83,7 +83,7 @@ IfExpression.prototype.toString = function() {
   return Utils.parenthesize(this.subs[0] + SYMBOL.IF + this.subs[1]);
 }
 IfExpression.prototype.equals = function(object) {
-  if (object.constructor != this.constructor) {
+  if (!(object instanceof IfExpression)) {
     return false;
   }
   if (!this.subs[0].equals(object.subs[0])) {
@@ -99,7 +99,7 @@ IffExpression.prototype.toString = function() {
   return Utils.parenthesize(this.subs[0] + SYMBOL.IFF + this.subs[1]);
 }
 IffExpression.prototype.equals = function(object) {
-  if (object.constructor != this.constructor) {
+  if (!(object instanceof IffExpression)) {
     return false;
   }
   if (!this.subs[0].equals(object.subs[0])) {
@@ -117,7 +117,7 @@ OrExpression.prototype.toString = function() {
   return Utils.parenthesize(Utils.arrayToString(this.subs, SYMBOL.OR));
 }
 OrExpression.prototype.contains = function(object) {
-  if (object.constructor != this.constructor) {
+  if (!(object instanceof OrExpression)) {
     return this.subs.includes(object);
   }
   for (var i = 0; i < object.subs.length; i++) {
@@ -129,7 +129,7 @@ OrExpression.prototype.contains = function(object) {
   return true;
 }
 OrExpression.prototype.equals = function(object) {
-  if (object.constructor != this.constructor) {
+  if (!(object instanceof OrExpression)) {
     return false;
   }
   if (this.subs.length != object.subs.length) {
@@ -146,7 +146,7 @@ AndExpression.prototype.toString = function() {
   return Utils.parenthesize(Utils.arrayToString(this.subs, SYMBOL.AND));
 }
 AndExpression.prototype.contains = function(object) {
-  if (object.constructor != this.constructor) {
+  if (!(object instanceof AndExpression)) {
     return this.subs.includes(object);
   }
   for (var i = 0; i < object.subs.length; i++) {
@@ -158,7 +158,7 @@ AndExpression.prototype.contains = function(object) {
   return true;
 }
 AndExpression.prototype.equals = function(object) {
-  if (object.constructor != this.constructor) {
+  if (!(object instanceof AndExpression)) {
     return false;
   }
   if (this.subs.length != object.subs.length) {
