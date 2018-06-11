@@ -2,7 +2,8 @@ function assertEquals(expected, actual) {
   var equals = expected.toString() == actual.toString();
   if (!equals) {
     var lineNum = (new Error()).stack.split("\n")[2].split(":")[3];
-    throw [lineNum, expected.toString(), actual.toString()];
+    throw "AssertEquals failed (Line " + lineNum + "). Expected: " + expected.toString() + " Actual: " + actual.toString();
+    //throw [lineNum, expected.toString(), actual.toString()];
   }
 }
 
@@ -16,9 +17,10 @@ function runTests() {
       test();
       passCount++;
     } catch (err) {
-      console.log("Test Failed: Line #" + err[0]);
-      console.log("    Expected Output:  " + err[1]);
-      console.log("    Actual Output:    " + err[2]);
+      console.log(err);
+      // console.log("Test Failed: Line #" + err[0]);
+      // console.log("    Expected Output:  " + err[1]);
+      // console.log("    Actual Output:    " + err[2]);
     }
   }
   console.log(passCount + "/" + TestSuite.length + " tests passed.");
@@ -55,5 +57,27 @@ const TestSuite = [
       identity(Parser.parse("a or F")));
     assertEquals(Parser.parse("a"),
       identity(Parser.parse("a and T")));
+  },
+  function containsTest() {
+    var v1 = Parser.parse("a and b and c");
+    var v2 = Parser.parse("a and b");
+    var v3 = Parser.parse("a");
+    var v4 = Parser.parse("a or b");
+    var v5 = Parser.parse("c and d");
+    assertEquals(true, v1.contains(v2));
+    assertEquals(true, v1.contains(v3));
+    assertEquals(false, v1.contains(v4));
+    assertEquals(false, v1.contains(v5));
+  },
+  function absorptionTest() {
+    assertEquals(Parser.parse("a and b"),
+      absorption(Parser.parse("(a and b) or (a and b and c)")));
+    assertEquals(Parser.parse("a or b"),
+      absorption(Parser.parse("(a or b) and (a or b or c)")));
   }
 ];
+
+function test() {
+  //testing function
+
+}

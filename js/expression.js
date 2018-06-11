@@ -60,11 +60,11 @@ NotExpression.prototype.equals = function(object) {
 
 //Binary Expressions
 
-function XorExpression(sub1, sub2) {
-  this.subs = [sub1, sub2];
+function XorExpression(subs) {
+  this.subs = subs;
 }
 XorExpression.prototype.toString = function() {
-  return Utils.parenthesize(this.subs[0] + SYMBOL.XOR + this.subs[1]);
+  return Utils.parenthesize(Utils.arrayToString(this.subs, SYMBOL.XOR));
 }
 XorExpression.prototype.equals = function(object) {
   if (!(object instanceof XorExpression)) {
@@ -76,8 +76,8 @@ XorExpression.prototype.equals = function(object) {
   return this.subs[1].equals(object.subs[1]);
 }
 
-function IfExpression(sub1, sub2) {
-  this.subs = [sub1, sub2];
+function IfExpression(subs) {
+  this.subs = subs;
 }
 IfExpression.prototype.toString = function() {
   return Utils.parenthesize(this.subs[0] + SYMBOL.IF + this.subs[1]);
@@ -92,8 +92,8 @@ IfExpression.prototype.equals = function(object) {
   return this.subs[1].equals(object.subs[1]);
 }
 
-function IffExpression(sub1, sub2) {
-  this.subs = [sub1, sub2];
+function IffExpression(subs) {
+  this.subs = subs;
 }
 IffExpression.prototype.toString = function() {
   return Utils.parenthesize(this.subs[0] + SYMBOL.IFF + this.subs[1]);
@@ -118,7 +118,12 @@ OrExpression.prototype.toString = function() {
 }
 OrExpression.prototype.contains = function(object) {
   if (!(object instanceof OrExpression)) {
-    return this.subs.includes(object);
+    for (var i = 0; i < this.subs.length; i++) {
+      if (this.subs[i].equals(object)) {
+        return true;
+      }
+    }
+    return false;
   }
   for (var i = 0; i < object.subs.length; i++) {
     var sub = object.subs[i];
@@ -147,11 +152,16 @@ AndExpression.prototype.toString = function() {
 }
 AndExpression.prototype.contains = function(object) {
   if (!(object instanceof AndExpression)) {
-    return this.subs.includes(object);
+    for (var i = 0; i < this.subs.length; i++) {
+      if (this.subs[i].equals(object)) {
+        return true;
+      }
+    }
+    return false;
   }
   for (var i = 0; i < object.subs.length; i++) {
     var sub = object.subs[i];
-    if (!this.contains(sub)) {
+    if (!(this.contains(sub))) {
       return false;
     }
   }

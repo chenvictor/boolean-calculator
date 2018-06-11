@@ -9,9 +9,9 @@ const EquivalencyLaws = [
   absorption,
   associative,
   //Rewriting Laws
+  commutative,
   implication,
   exclusiveOr,
-  commutative,
   //Expansion Laws
   deMorgans,
   distributive
@@ -22,35 +22,51 @@ const TIMEOUT_STEPS = 100;
 function Step(expression, law) {
   this.result = expression;
   this.lawString = law;
+  this.extraData = null;
 }
 
 function simplify(expression) {
-
   var steps = [];
   var current = expression;
   var stepsCount = 0;
+  distributeOutwards = true;
   for (var i = 0; i < EquivalencyLaws.length; i++) {
     var law = EquivalencyLaws[i];
     //console.log("Law: " + Utils.getLawName(law, true));
     var attempt = applyLawOnce(current, law);
     if (attempt == false) {
+      if (i == EquivalencyLaws.length - 1) {
+        //last steps
+        if (distributeOutwards) {
+          //start simplifying distribution
+          distributeOutwards = false;
+          i = -1;
+        }
+      }
       continue;
     }
-    //console.log("    " + current + " -> " + attempt);
     current = attempt;
     if (!Settings.skipLaw(law)) {
-      steps.push(new Step(current.toString(), "by " + Utils.getLawName(law)));
+      if (law == distributive) {
+        if (steps.length != 0 && (steps[steps.length - 1].extraData == true) && !distributeOutwards) {
+          //if the previous step was outwards distribution, and this one is inner, don't store either steps
+          //remove previous step
+          steps.pop();
+        } else {
+          //store this step, with distribution direction
+          var newStep = new Step(current.toString(), "by " + Utils.getLawName(law));
+          newStep.extraData = distributeOutwards;
+          steps.push(newStep);
+        }
+      } else {
+        //store this step
+        steps.push(new Step(current.toString(), "by " + Utils.getLawName(law)));
+      }
     }
     //success, start at beginning again
     i = -1; //-1 to reset to 0 after ++
     if (++stepsCount > TIMEOUT_STEPS) {
       //after TIMEOUT_STEPS successful attempts, abort, taking too long
-      //log all steps
-      console.log("Timed out after steps(" + stepsCount + "):");
-      // for (var i = 0; i < steps.length; i++) {
-      //   console.log(steps[i]);
-      // }
-
       throw "Simplification timed out!";
       alert("Simplification timed out!");
     }
@@ -62,7 +78,8 @@ function simplify(expression) {
 
 function applyLawOnce(expression, lawFunction) {
   if (expression instanceof Array) {
-    throw "Unexpected array";
+    console.log("Unexpected array: " + expression);
+    throw "Unexpected Array";
   }
   var applied = lawFunction(expression);
   if (applied != false) {
@@ -166,7 +183,12 @@ function associativeHelper(subs, type) {
   return array;
 }
 
+var distributeOutwards = true;
+
 function distributive(expression) {
+  if (!distributeOutwards) {
+    return undistribute(expression);
+  }
   var type;
   var opposite;
   if (expression instanceof AndExpression) {
@@ -179,10 +201,10 @@ function distributive(expression) {
     //doesn't apply
     return false;
   }
-  if (expression.subs.length > 3) {
-    //don't distribute if expression is long already
-    return false;
-  }
+  // if (expression.subs.length > 3) {
+  //   //don't distribute if expression is long already
+  //   return false;
+  // }
   var idx = distributiveHelper(expression.subs, opposite);
   if (idx == false) {
     //all opposite expression
@@ -190,7 +212,7 @@ function distributive(expression) {
   }
   if (idx == -1) {
     return false;
-    //no or
+    //no opposite
   }
   var orExp = expression.subs[idx];
   var others = expression.subs.slice(0, idx).concat(expression.subs.slice(idx + 1));
@@ -201,6 +223,74 @@ function distributive(expression) {
     newArray.push(new type(copy));
   }
   return new opposite(newArray);
+}
+
+function undistribute(expression) {
+  var type;
+  var opposite;
+  if (expression instanceof AndExpression) {
+    type = AndExpression;
+    opposite = OrExpression;
+  } else if (expression instanceof OrExpression) {
+    type = OrExpression;
+    opposite = AndExpression;
+  } else {
+    //doesn't apply
+    return false;
+  }
+  var others = [];
+  for (var i = 0; i < expression.subs.length; i++) {
+    var sub = expression.subs[i];
+    if (sub instanceof opposite) {
+      others.push(sub);
+    }
+  }
+  if (others.length < 2) {
+    //need at least 2 expressions to check for distribution
+    return false;
+  }
+  var commonVars = others[0].subs.slice();
+  var notCommon = [];
+  for (var i = 1; i < others.length; i++) {
+    for (var j = 0; j < commonVars.length; j++) {
+      if (!(others[i].contains(commonVars[j]))) {
+        notCommon.push(commonVars[j]);
+      }
+    }
+  }
+  var tempExp = new AndExpression(notCommon);
+  var commons = [];
+  for (var i = 0; i < commonVars.length; i++) {
+    if (!(tempExp.contains(commonVars[i]))) {
+      commons.push(commonVars[i]);
+    }
+  }
+  if (commons.length == 0) {
+    return false;
+  } else {
+    commons = new opposite(commons);
+  }
+  var newOthers = [];
+  for (var i = 0; i < others.length; i++) {
+    var other = others[i];
+    var newOther = [];
+    for (var j = 0; j < other.subs.length; j++) {
+      var sub = other.subs[j];
+      if (commons.contains(sub)) {
+        //ignore
+      } else {
+        newOther.push(sub);
+      }
+    }
+    if (newOther.length == 1) {
+      newOthers.push(newOther[0]);
+    } else {
+      newOthers.push(new opposite(newOther));
+    }
+  }
+  newOthers = new type(newOthers);
+  commons.subs.push(newOthers);
+  return commons;
 }
 
 //Helper function for distributive
@@ -399,9 +489,9 @@ function absorption(expression) {
   //for all the others, if they contain one of the original array elements, don't include them
   for (var i = 0; i < others.length; i++) {
     var other = others[i];
-    for (var j = 0; j < other.subs.length; j++) {
-      var inner = other.subs[j];
-      if (expression.contains(inner)) {
+    for (var j = 0; j < expression.subs.length; j++) {
+      var inner = expression.subs[j];
+      if (!(other.equals(inner)) && other.contains(inner)) {
         toRemove.push(other);
         break;
       }
@@ -429,6 +519,8 @@ function absorption(expression) {
 function implication(expression) {
   if (expression instanceof IfExpression) {
     return new OrExpression([new NotExpression([expression.subs[0]]), expression.subs[1]]);
+  } else if (expression instanceof IffExpression) {
+    return new NotExpression([new XorExpression([expression.subs[0], expression.subs[1]])]);
   }
   return false;
 }

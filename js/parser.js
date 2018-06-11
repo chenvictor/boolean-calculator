@@ -155,11 +155,11 @@ const Parser = new function() {
           case OR_EXPRESSIONS[0]:
             return processOrExpression(array);
           case XOR_EXPRESSIONS[0]:
-            return new XorExpression(processParsedArray(preBinary), processParsedArray(postBinary));
+            return new XorExpression([processParsedArray(preBinary), processParsedArray(postBinary)]);
           case IF_EXPRESSIONS[0]:
-            return new IfExpression(processParsedArray(preBinary), processParsedArray(postBinary));
+            return new IfExpression([processParsedArray(preBinary), processParsedArray(postBinary)]);
           case IFF_EXPRESSIONS[0]:
-            return new IffExpression(processParsedArray(preBinary), processParsedArray(postBinary));
+            return new IffExpression([processParsedArray(preBinary), processParsedArray(postBinary)]);
           default:
             throw "Parsing error. AB idx:" + index;
         }
@@ -186,6 +186,10 @@ const Parser = new function() {
 
   var processAndExpression = function(array) {
     return processAssociativeExpression(array, SYMBOL.AND, AndExpression);
+  }
+
+  var processXorExpression = function(array) {
+    return processAssociativeExpression(array, SYMBOL.XOR, XorExpression);
   }
 
   var processAssociativeExpression = function(array, symbol, construct) {
@@ -258,24 +262,33 @@ const Parser = new function() {
 
   var isAmbiguousArray = function(array) {
     var unique = false;
-    var hit = false;
+    var binaryCount = 0;
+    var associativeCount = 0;
     for (var i = 0; i < array.length; i++) {
       var temp = array[i];
       if (isBinaryOperator(temp)) {
         if (isAssociativeOperator(temp)) {
+          associativeCount++;
           if (unique == false) {
             unique = temp;
           } else {
             if (unique != temp) {
+              //can't use different associative operators together
               return true;
             }
           }
+          if (binaryCount > 0) {
+            //binary and associative don't mix
+            return true;
+          }
         } else {
-          if (hit) {
+          binaryCount++;
+          if (associativeCount > 0 || binaryCount > 1) {
+            //binary and associative don't mix
+            //more than one binary is not allowed
             return true;
           }
         }
-        hit = true;
       }
     }
     return false;
