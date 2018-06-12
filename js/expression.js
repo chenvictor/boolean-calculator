@@ -1,5 +1,3 @@
-//NOTE: All expressions apart from variables use subs array. array length is not enforced.
-
 //Unary Expressions
 const True = new function() {
   this.toString = function() {

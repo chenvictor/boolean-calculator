@@ -25,7 +25,7 @@ window.addEventListener("load", function() {
 function goClicked() {
   if (isGoButtonEnabled()) {
     Display.clearSteps();
-    var steps = simplify(parsedResult);
+    var steps = Equivalency.simplify(parsedResult);
     if (steps.length == 0) {
       //nothing was done
       Display.setResult(parsedResult);
@@ -44,6 +44,16 @@ function goClicked() {
 var wto;
 var parsedResult;
 
+function expressionChanged() {
+  Display.setOutputVisible(false);
+  Display.resetPreview();
+  clearTimeout(wto);
+  wto = setTimeout(function() {
+    var expression = document.getElementById("expression").value;
+    beginParse(expression);
+  }, 500);
+}
+
 function beginParse(expression) {
   try {
     parsedResult = Parser.parse(expression);
@@ -54,14 +64,4 @@ function beginParse(expression) {
     Display.preview(errorMsg);
     Display.variables();
   }
-}
-
-function expressionChanged() {
-  Display.setOutputVisible(false);
-  Display.resetPreview();
-  clearTimeout(wto);
-  wto = setTimeout(function() {
-    var expression = document.getElementById("expression").value;
-    beginParse(expression);
-  }, 500);
 }

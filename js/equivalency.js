@@ -17,104 +17,93 @@ const EquivalencyLaws = [
   distributive
 ];
 
-const TIMEOUT_STEPS = 100;
-
 function Step(expression, law) {
   this.result = expression;
   this.lawString = law;
   this.extraData = null;
 }
 
-function simplify(expression) {
-  var steps = [];
-  var current = expression;
-  var stepsCount = 0;
-  distributeOutwards = true;
-  for (var i = 0; i < EquivalencyLaws.length; i++) {
-    var law = EquivalencyLaws[i];
-    //console.log("Law: " + Utils.getLawName(law, true));
-    var attempt = applyLawOnce(current, law);
-    if (attempt == false) {
-      if (i == EquivalencyLaws.length - 1) {
-        //last steps
-        if (distributeOutwards) {
-          //start simplifying distribution
-          distributeOutwards = false;
-          i = -1;
-        }
-      }
-      continue;
-    }
-    current = attempt;
-    if (!Settings.skipLaw(law)) {
-      if (law == distributive) {
-        if (steps.length != 0 && (steps[steps.length - 1].extraData == true) && !distributeOutwards) {
-          //if the previous step was outwards distribution, and this one is inner, don't store either steps
-          //remove previous step
-          steps.pop();
-        } else {
-          //store this step, with distribution direction
-          var newStep = new Step(current.toString(), "by " + Utils.getLawName(law));
-          newStep.extraData = distributeOutwards;
-          steps.push(newStep);
-        }
-      } else {
-        //store this step
-        steps.push(new Step(current.toString(), "by " + Utils.getLawName(law)));
-      }
-    }
-    //success, start at beginning again
-    i = -1; //-1 to reset to 0 after ++
-    if (++stepsCount > TIMEOUT_STEPS) {
-      //after TIMEOUT_STEPS successful attempts, abort, taking too long
-      throw "Simplification timed out!";
-      alert("Simplification timed out!");
-    }
-  }
-  steps.push(new Step(current.toString(), "result"));
-  //as simple as possible
-  return steps;
-}
+const Equivalency = new function() {
 
-function applyLawOnce(expression, lawFunction) {
-  if (expression instanceof Array) {
-    console.log("Unexpected array: " + expression);
-    throw "Unexpected Array";
-  }
-  var applied = lawFunction(expression);
-  if (applied != false) {
-    if (applied instanceof Array) {
-      throw "Unexpected array";
-    }
-    return applied;
-  } else {
-    var subs = expression.subs;
-    if (subs == null) {
-      return false;
-      //no more to try
-    } else {
-      //try on the subs
-      var newSubs = [];
-      var didApply = false;
-      for (var i = 0; i < subs.length; i++) {
-        var subApplied = applyLawOnce(subs[i], lawFunction);
-        if (subApplied != false) {
-          newSubs.push(subApplied);
-          newSubs = newSubs.concat(subs.splice(i + 1));
-          //found one, add the rest and done
-          didApply = true;
-          break;
-        } else {
-          if (subApplied instanceof Array) {
-            throw "Unexpected array";
+  this.simplify = function(expression) {
+    var steps = [];
+    var current = expression;
+    var stepsCount = 0;
+    distributeOutwards = true;
+    for (var i = 0; i < EquivalencyLaws.length; i++) {
+      var law = EquivalencyLaws[i];
+      var attempt = applyLawOnce(current, law);
+      if (attempt == false) {
+        if (i == EquivalencyLaws.length - 1) {
+          //last steps
+          if (distributeOutwards) {
+            //start simplifying distribution
+            distributeOutwards = false;
+            i = -1;
           }
-          newSubs.push(subs[i]);
+        }
+        continue;
+      }
+      current = attempt;
+      if (!Settings.skipLaw(law)) {
+        if (law == distributive) {
+          if (steps.length != 0 && (steps[steps.length - 1].extraData == true) && !distributeOutwards) {
+            //if the previous step was outwards distribution, and this one is inner, don't store either steps
+            //remove previous step
+            steps.pop();
+          } else {
+            //store this step, with distribution direction
+            var newStep = new Step(current.toString(), "by " + Utils.getLawName(law));
+            newStep.extraData = distributeOutwards;
+            steps.push(newStep);
+          }
+        } else {
+          //store this step
+          steps.push(new Step(current.toString(), "by " + Utils.getLawName(law)));
         }
       }
-      if (didApply) {
-        return new expression.constructor(newSubs);
-      } else {
+      //success, start at beginning again
+      i = -1; //-1 to reset to 0 after ++
+      if (++stepsCount > TIMEOUT_STEPS) {
+        //after TIMEOUT_STEPS successful attempts, abort, taking too long
+        throw "Simplification timed out!";
+        alert("Simplification timed out!");
+      }
+    }
+    steps.push(new Step(current.toString(), "result"));
+    //as simple as possible
+    return steps;
+  }
+  var applyLawOnce = function(expression, lawFunction) {
+    var applied = lawFunction(expression);
+    if (applied != false) {
+      return applied;
+    } else {
+      var subs = expression.subs;
+      if (subs == null) {
         return false;
+        //no more to try
+      } else {
+        //try on the subs
+        var newSubs = [];
+        var didApply = false;
+        for (var i = 0; i < subs.length; i++) {
+          var subApplied = applyLawOnce(subs[i], lawFunction);
+          if (subApplied != false) {
+            newSubs.push(subApplied);
+            newSubs = newSubs.concat(subs.splice(i + 1));
+            //found one, add the rest and done
+            didApply = true;
+            break;
+          } else {
+            newSubs.push(subs[i]);
+          }
+        }
+        if (didApply) {
+          return new expression.constructor(newSubs);
+        } else {
+          return false;
+        }
       }
     }
   }

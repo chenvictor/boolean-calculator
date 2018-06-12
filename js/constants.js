@@ -7,3 +7,5 @@ const SYMBOL = {
   IF: "→",
   IFF: "↔"
 };
+
+const TIMEOUT_STEPS = 100;
