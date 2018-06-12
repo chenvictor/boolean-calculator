@@ -5,14 +5,12 @@ const EquivalencyLaws = [
   doubleNegation,
   negationsOfTF,
   universalBound,
+  associative,
+  commutative,
   idempotent,
   absorption,
-  associative,
-  //Rewriting Laws
-  commutative,
   implication,
   exclusiveOr,
-  //Expansion Laws
   deMorgans,
   distributive
 ];
@@ -24,6 +22,8 @@ function Step(expression, law) {
 }
 
 const Equivalency = new function() {
+
+  const TIMEOUT_STEPS = 100;
 
   this.simplify = function(expression) {
     var steps = [];
@@ -498,6 +498,9 @@ function absorption(expression) {
   }
   if (!changed) {
     return false;
+  }
+  if (newArray.length == 0) {
+    return expression.subs[0];
   }
   if (newArray.length == 1) {
     return newArray[0];

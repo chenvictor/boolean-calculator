@@ -1,3 +1,12 @@
+const SYMBOL = {
+  NOT: "¬",
+  AND: "∧",
+  OR: "∨",
+  XOR: "⊕",
+  IF: "→",
+  IFF: "↔"
+};
+
 const Parser = new function() {
   //Equivalents for expressions
   var NOT_EXPRESSIONS = [SYMBOL.NOT, "~", "-", "!", "not"];
