@@ -53,13 +53,12 @@ const Parser = new function() {
   var CLOSE_PARENS = "\)";
   //Public methods
   this.parse = function(expression) {
-    VariableManager.clear();
     if (invalidParentheses(expression)) {
-      throw "Error: Check parentheses count";
+      throw "Parsing Error: Check parentheses count.";
     }
     expression = expression.split(" ").join(""); //removes spaces
     if (expression.length == 0) {
-      throw "Preview...";
+      throw "Nothing Entered.";
       //nothing inputted;
     }
     //return parenthesized;
@@ -153,7 +152,7 @@ const Parser = new function() {
         if (array.shift() == NOT_EXPRESSIONS[0]) {
           return new NotExpression([processParsedArray(array)]);
         } else {
-          throw "Parsing error. Unfinished expression";
+          throw "Parsing error: Unfinished expression";
         }
       } else {
         var preBinary = array.slice(0, index);
@@ -181,7 +180,7 @@ const Parser = new function() {
     if (parseAgain == single) {
       //same, it's a variableName
       if (isBinaryOperator(single) || single == NOT_EXPRESSIONS[0]) {
-        throw "Parsing error. Unfinished expression";
+        throw "Parsing error: Unfinished expression";
       }
       return VariableManager.get(single);
     } else {
@@ -224,7 +223,7 @@ const Parser = new function() {
           tempNot = [];
         }
         if (counter % 2 == 1) {
-          throw "Parsing error. Unfinished expression";
+          throw "Parsing error: Unfinished expression";
         }
       } else {
         if (tempNot.length == 0) {

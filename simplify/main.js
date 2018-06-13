@@ -50,12 +50,15 @@ function expressionChanged() {
   clearTimeout(wto);
   wto = setTimeout(function() {
     var expression = document.getElementById("expression").value;
-    beginParse(expression);
+    if (expression.length != 0) {
+      beginParse(expression);
+    }
   }, 500);
 }
 
 function beginParse(expression) {
   try {
+    VariableManager.clear();
     parsedResult = Parser.parse(expression);
     Display.preview("Preview: " + parsedResult);
     Display.variables(VariableManager.getVariables());

@@ -42,23 +42,17 @@
     <ul class="list-group">
       <li class="list-group-item" id="predicates">
         <h3>Predicates:</h3>
-        <div class="input-group mb-3">
+        <div class="input-group mb-3" id="predicate1">
           <div class="input-group-prepend">
             <span class="input-group-text">1</span>
           </div>
-          <input type="text" class="form-control" placeholder="predicate" aria-label="Predicate" oninput="validate(this, 1);" autofocus>
-          <div class="invalid-tooltip" id="invalid1">
-            Could not be parsed.
-          </div>
+          <input type="text" class="form-control" placeholder="predicate" aria-label="Predicate" oninput="validate(this);" onkeydown="Display.keyPress(this)" data-pred="1" autofocus>
         </div>
         <div class="input-group mb-3 fading" id="fading">
           <div class="input-group-prepend">
             <span class="input-group-text">2</span>
           </div>
           <input type="text" class="form-control" placeholder="predicate" aria-label="Predicate" tabindex="-1" onclick="Display.addPredicate()">
-          <div class="invalid-tooltip" id="invalid2">
-            Could not be parsed.
-          </div>
         </div>
       </li>
       <li class="list-group-item collapse" id="steps">
@@ -72,9 +66,8 @@
           </div>
           <input type="text" class="form-control" placeholder="conclusion" aria-label="Conclusion" oninput="validate(this, 0);" id="cInput">
           <button type="button" class="btn btn-primary" onclick="goClicked();" id="buttonProve">Go!</button>
-          <div class="invalid-tooltip" id="invalid0">
-            Could not be parsed.
-          </div>
+        </div>
+        <div id="alerts">
         </div>
       </li>
     </ul>
@@ -90,6 +83,7 @@
   <script src="../js/expression.js?v=1.8"></script>
   <script src="../js/parser.js?v=1.5"></script>
   <script src="../js/variable.js?v=1.3"></script>
+  <script src="../js/utils.js?v=1.4"></script>
   <script src="main.js?v=1.0"></script>
   <script src="display.js?v=1.0"></script>
   <!-- Enable Tooltips -->

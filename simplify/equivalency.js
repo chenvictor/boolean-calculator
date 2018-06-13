@@ -15,6 +15,45 @@ const EquivalencyLaws = [
   distributive
 ];
 
+var longDict = {
+  commutative: "Commutative",
+  associative: "Associative",
+  distributive: "Distributive",
+  identity: "Identity",
+  negation: "Negation",
+  doubleNegation: "Double Negation",
+  idempotent: "Idempotent",
+  universalBound: "Universal Bound",
+  deMorgans: "De Morgan's",
+  absorption: "Absorption",
+  negationsOfTF: "Negations of T and F",
+  implication: "Implication",
+  exclusiveOr: "Exclusive Or"
+};
+var shortDict = {
+  commutative: "COM",
+  associative: "ASS",
+  distributive: "DIST",
+  identity: "I",
+  negation: "NEG",
+  doubleNegation: "DNEG",
+  idempotent: "ID",
+  universalBound: "UB",
+  deMorgans: "DM",
+  absorption: "ABS",
+  negationsOfTF: "NTF",
+  implication: "IMP",
+  exclusiveOr: "XOR"
+};
+
+function getLawName(lawFunction, useShort = Settings.getValue("short")) {
+  var dictToUse = longDict;
+  if (useShort) {
+    dictToUse = shortDict;
+  }
+  return dictToUse[lawFunction.name];
+}
+
 function Step(expression, law) {
   this.result = expression;
   this.lawString = law;
@@ -53,13 +92,13 @@ const Equivalency = new function() {
             steps.pop();
           } else {
             //store this step, with distribution direction
-            var newStep = new Step(current.toString(), "by " + Utils.getLawName(law));
+            var newStep = new Step(current.toString(), "by " + getLawName(law));
             newStep.extraData = distributeOutwards;
             steps.push(newStep);
           }
         } else {
           //store this step
-          steps.push(new Step(current.toString(), "by " + Utils.getLawName(law)));
+          steps.push(new Step(current.toString(), "by " + getLawName(law)));
         }
       }
       //success, start at beginning again

@@ -2,6 +2,11 @@ const VariableManager = new function() {
   var variables = [];
 
   this.get = function(varName) {
+    var filter = /^[a-zA-Z]+$/;
+    if (!filter.test(varName)) {
+      throw "Parsing Error: Variables should be comprised of letters only.";
+    }
+    //make sure variableName contains only letters
     if (varName == "T") {
       return True;
     } else if (varName == "F") {

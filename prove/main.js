@@ -10,7 +10,6 @@ window.addEventListener("load", function() {
 
 
 var wtos = [];
-var parsedExpressions = ["No conclusion", "No predicates"];
 
 function validate(input, wtoIdx) {
   //wtoIdx 0 = Conclusion, other = predicate #wtoIdx
@@ -19,33 +18,59 @@ function validate(input, wtoIdx) {
     //standardize
     var value = Parser.standardize(input.value);
     input.value = value;
-    wtos[wtoIdx] = setTimeout(function() {
-      try {
-        var parsed = Parser.parse(value);
-        parsedExpressions[wtoIdx] = parsed;
-      } catch (e) {
-        parsedExpressions[wtoIdx] = e;
-      }
-    }, 500);
   }, 500);
 }
 
 function goClicked() {
-  prove();
+  Display.clearAlerts();
+  //parse all the expressions
+  var parsedExpressions = getParsed();
+  if (!isValid(parsedExpressions)) {
+    return;
+  }
+  prove(parsedExpressions);
 }
 
-function prove() {
+function getParsed() {
+  VariableManager.clear();
+  var exps = [];
+  //Conclusion
+  var cInput = document.getElementById('cInput').value.toString();
+  try {
+    exps.push(Parser.parse(cInput));
+  } catch (e) {
+    exps.push(e);
+  }
+  for (var i = 1; i <= Display.getNumPreds(); i++) {
+    var predDiv = document.getElementById("predicate" + i);
+    var predInput = predDiv.getElementsByTagName('input')[0].value.toString();
+    try {
+      exps.push(Parser.parse(predInput));
+    } catch (e) {
+      exps.push(e);
+    }
+  }
+  return exps;
+}
+
+function isValid(parsedExpressions) {
   for (var i = 0; i < parsedExpressions.length; i++) {
     var exp = parsedExpressions[i];
     if (typeof(exp) == "string") {
       if (i == 0) {
-        alert("Conclusion invalid");
+        Display.alert("Conclusion invalid: ", exp);
         $("#cInput").focus();
       } else {
-        alert("Predicate #" + i + " invalid\n" + exp);
+        Display.alert("Predicate #" + i + " invalid: ", exp);
         document.getElementsByTagName('input')[i - 1].focus();
       }
-      return;
+      return false;
     }
   }
+  return true;
+}
+
+function prove(exps) {
+  alert("Let's prove this!");
+  console.log(exps);
 }
