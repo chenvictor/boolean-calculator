@@ -63,13 +63,13 @@ const Parser = new function() {
       //nothing inputted;
     }
     //return parenthesized;
-    return processParsedArray(parseStandard(standardize(expression)));
+    return processParsedArray(parseStandard(this.standardize(expression)));
   }
 
   //Helper methods
 
   //Pre-parse processing
-  var standardize = function(expression) {
+  this.standardize = function(expression) {
     //replaces any expressions with the standard
     expression = _standard(expression, AND_EXPRESSIONS);
     expression = _standard(expression, XOR_EXPRESSIONS);
