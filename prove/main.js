@@ -24,7 +24,6 @@ function validate(input, wtoIdx) {
 var parsedExpressions;
 
 function goClicked() {
-  Display.clearAlerts();
   //parse all the expressions
   parsedExpressions = getParsed();
   if (!isValid(parsedExpressions)) {
@@ -60,10 +59,10 @@ function isValid(parsedExpressions) {
     var exp = parsedExpressions[i];
     if (typeof(exp) == "string") {
       if (i == 0) {
-        Display.alert("Conclusion invalid: ", exp);
+        Display.error("Conclusion invalid: ", exp);
         $("#cInput").focus();
       } else {
-        Display.alert("Predicate #" + i + " invalid: ", exp);
+        Display.error("Predicate #" + i + " invalid: ", exp);
         document.getElementsByTagName('input')[i - 1].focus();
       }
       return false;
@@ -76,7 +75,7 @@ function prove(exps) {
   //check for invalitating truth assignments
   var assignments = VariableManager.getTruthAssignments();
   var premsContradict = true;
-  var invalidArgument = false;
+  var invalidatingAssignment = null;
   for (var i = 0; i < assignments.length; i++) {
     var assign = assignments[i];
     switch (satisfies(exps, assign)) {
@@ -84,23 +83,26 @@ function prove(exps) {
         premsContradict = false;
         break;
       case -1:
-        invalidArgument = assign;
+        invalidatingAssignment = assign;
+        break;
+    }
+    if (invalidatingAssignment != null) {
+      break;
     }
   }
-  if (invalidArgument == false) {
+  if (invalidatingAssignment == null) {
     console.log("Argument is valid");
+    console.log("Predicates contradict: " + premsContradict);
   } else {
-    console.log("Invalidating Assignment: " + invalidArgument);
+    console.log("Invalidating Assignment: " + invalidatingAssignment);
   }
-  console.log("Predicates contradict: " + premsContradict);
 }
 
 function satisfies(exps, assignment) {
   //return true if exps[0] is true, or if premises are false
   var conc = exps[0].evaluate(assignment);
-  var prems = new AndExpression(exps.splice(1)).evaluate(assignment);
-  console.log(conc);
-  console.log(prems);
+  var conj = new AndExpression(exps.slice(1));
+  var prems = conj.evaluate(assignment);
   if (prems && conc) {
     return 1; //true, prems true, conc true
   } else if (!prems) {

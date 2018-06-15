@@ -67,7 +67,10 @@
           <input type="text" class="form-control" placeholder="conclusion" aria-label="Conclusion" oninput="validate(this, 0);" id="cInput">
           <button type="button" class="btn btn-primary" onclick="goClicked();" id="buttonProve">Go!</button>
         </div>
-        <div id="alerts">
+        <div class="collapse" id="collapseOutput">
+          <div class="card card-body" id="output">
+            Invalidating Assignment:
+          </div>
         </div>
       </li>
     </ul>
@@ -86,10 +89,10 @@
   <script src="../js/utils.js?v=1.4"></script>
   <script src="main.js?v=1.0"></script>
   <script src="display.js?v=1.0"></script>
-  <!-- Enable Tooltips -->
+  <!-- Enable Bootstrap Elements -->
   <script>
     $(document).ready(function() {
-      $('[data-toggle="tooltip"]').tooltip();
+
     });
   </script>
 

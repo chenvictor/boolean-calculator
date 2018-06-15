@@ -93,30 +93,31 @@ const Display = new function() {
         break;
     }
   }
-  this.alert = function(title, text) {
-    var alertDiv = document.getElementById('alerts');
-    var newDiv = document.createElement('div');
-    newDiv.setAttribute('class', "alert alert-danger alert-dismissible fade show");
-    newDiv.setAttribute('role', "alert");
-    var bold = document.createElement('strong');
-    bold.innerHTML = title;
-    var button = document.createElement('button');
-    button.setAttribute('type', "button");
-    button.setAttribute('class', "close");
-    button.setAttribute('data-dismiss', "alert");
-    button.setAttribute('aria-label', "Close");
-    var span = document.createElement('span');
-    span.setAttribute('aria-hidden', "true");
-    span.innerHTML = "&times;";
-
-    newDiv.appendChild(bold);
-    newDiv.innerHTML += text;
-    button.appendChild(span);
-    newDiv.appendChild(button);
-
-    alertDiv.appendChild(newDiv);
+  this.error = function(title, text) {
+    setOutput(title, text);
+    this.setOutputVisible();
   };
-  this.clearAlerts = function() {
-    document.getElementById('alerts').innerHTML = "";
-  }
+  this.assignment = function(assignment) {
+    var assignString = "test";
+    setOutput("Invalidating Variable Assignment: ", assignString);
+    this.setOutputVisible();
+  };
+  var setOutput = function(title, text) {
+    var out = document.getElementById("output");
+    out.innerHTML = "";
+    var bold = document.createElement("strong");
+    bold.innerHTML = title;
+    out.appendChild(bold);
+    out.innerHTML += text;
+  };
+
+  this.setOutputVisible = function(visible = true) {
+    if (visible) {
+      $('#collapseOutput').collapse('show');
+    } else {
+      document.getElementById("collapseOutput").classList.remove('show');
+    }
+  };
+
+
 }
