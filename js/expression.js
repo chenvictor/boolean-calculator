@@ -9,6 +9,9 @@ const True = new function() {
   this.clone = function() {
     return this;
   }
+  this.evaluate = function(variableStates) {
+    return true;
+  }
 }
 
 const False = new function() {
@@ -20,6 +23,9 @@ const False = new function() {
   }
   this.clone = function() {
     return this;
+  }
+  this.evaluate = function(variableStates) {
+    return false;
   }
 }
 
@@ -35,8 +41,8 @@ Variable.prototype.equals = function(object) {
   }
   return this.variableName == object.variableName;
 }
-Variable.prototype.clone = function(object) {
-  return this;
+Variable.prototype.evaluate = function(variableStates) {
+  return variableStates[this.variableName];
 }
 
 function isVariable(exp) {
@@ -54,6 +60,9 @@ NotExpression.prototype.equals = function(object) {
     return false;
   }
   return this.subs[0].equals(object.subs[0]);
+}
+NotExpression.prototype.evaluate = function(variableStates) {
+  return !this.subs[0].evaluate(variableStates);
 }
 
 //Binary Expressions
@@ -73,6 +82,11 @@ XorExpression.prototype.equals = function(object) {
   }
   return this.subs[1].equals(object.subs[1]);
 }
+XorExpression.prototype.evaluate = function(variableStates) {
+  var p1 = this.subs[0].evaluate(variableStates);
+  var p2 = this.subs[1].evaluate(variableStates);
+  return (p1 != p2);
+}
 
 function IfExpression(subs) {
   this.subs = subs;
@@ -89,6 +103,11 @@ IfExpression.prototype.equals = function(object) {
   }
   return this.subs[1].equals(object.subs[1]);
 }
+IfExpression.prototype.evaluate = function(variableStates) {
+  var p1 = this.subs[0].evaluate(variableStates);
+  var p2 = this.subs[1].evaluate(variableStates);
+  return (!p1) || p2;
+}
 
 function IffExpression(subs) {
   this.subs = subs;
@@ -104,6 +123,11 @@ IffExpression.prototype.equals = function(object) {
     return false;
   }
   return this.subs[1].equals(object.subs[1]);
+}
+IffExpression.prototype.evaluate = function(variableStates) {
+  var p1 = this.subs[0].evaluate(variableStates);
+  var p2 = this.subs[1].evaluate(variableStates);
+  return (p1 == p2);
 }
 
 //Arbitrary Gates
@@ -140,6 +164,15 @@ OrExpression.prototype.equals = function(object) {
   }
   return this.toString() == object.toString();
 }
+OrExpression.prototype.evaluate = function(variableStates) {
+  for (var i = 0; i < this.subs.length; i++) {
+    var p = this.subs[i].evaluate(variableStates);
+    if (p) {
+      return true;
+    }
+  }
+  return false;
+}
 
 function AndExpression(subs) {
   this.subs = subs;
@@ -175,4 +208,14 @@ AndExpression.prototype.equals = function(object) {
   //assume elements are in order
   return this.toString() == object.toString();
   //return false;
+}
+
+AndExpression.prototype.evaluate = function(variableStates) {
+  for (var i = 0; i < this.subs.length; i++) {
+    var p = this.subs[i].evaluate(variableStates);
+    if (!p) {
+      return false;
+    }
+  }
+  return true;
 }

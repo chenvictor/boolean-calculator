@@ -40,19 +40,19 @@
     </div>
     <!-- Input area -->
     <ul class="list-group">
-      <li class="list-group-item" id="predicates">
-        <h3>Predicates:</h3>
-        <div class="input-group mb-3" id="predicate1">
+      <li class="list-group-item" id="premises">
+        <h3>Premises:</h3>
+        <div class="input-group mb-3" id="premise1">
           <div class="input-group-prepend">
             <span class="input-group-text">1</span>
           </div>
-          <input type="text" class="form-control" placeholder="predicate" aria-label="Predicate" oninput="validate(this);" onkeydown="Display.keyPress(this)" data-pred="1" autofocus>
+          <input type="text" class="form-control" placeholder="premise" aria-label="Predicate" oninput="validate(this);" onkeydown="Display.keyPress(this)" data-prem="1" autofocus>
         </div>
         <div class="input-group mb-3 fading" id="fading">
           <div class="input-group-prepend">
             <span class="input-group-text">2</span>
           </div>
-          <input type="text" class="form-control" placeholder="predicate" aria-label="Predicate" tabindex="-1" onclick="Display.addPredicate()">
+          <input type="text" class="form-control" placeholder="premise" aria-label="Predicate" tabindex="-1" onclick="Display.addPredicate()">
         </div>
       </li>
       <li class="list-group-item collapse" id="steps">

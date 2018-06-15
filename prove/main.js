@@ -12,7 +12,7 @@ window.addEventListener("load", function() {
 var wtos = [];
 
 function validate(input, wtoIdx) {
-  //wtoIdx 0 = Conclusion, other = predicate #wtoIdx
+  //wtoIdx 0 = Conclusion, other = premise #wtoIdx
   clearTimeout(wtos[wtoIdx]);
   wtos[wtoIdx] = setTimeout(function() {
     //standardize
@@ -21,10 +21,12 @@ function validate(input, wtoIdx) {
   }, 500);
 }
 
+var parsedExpressions;
+
 function goClicked() {
   Display.clearAlerts();
   //parse all the expressions
-  var parsedExpressions = getParsed();
+  parsedExpressions = getParsed();
   if (!isValid(parsedExpressions)) {
     return;
   }
@@ -42,10 +44,10 @@ function getParsed() {
     exps.push(e);
   }
   for (var i = 1; i <= Display.getNumPreds(); i++) {
-    var predDiv = document.getElementById("predicate" + i);
-    var predInput = predDiv.getElementsByTagName('input')[0].value.toString();
+    var premDiv = document.getElementById("premise" + i);
+    var premInput = premDiv.getElementsByTagName('input')[0].value.toString();
     try {
-      exps.push(Parser.parse(predInput));
+      exps.push(Parser.parse(premInput));
     } catch (e) {
       exps.push(e);
     }
@@ -71,6 +73,41 @@ function isValid(parsedExpressions) {
 }
 
 function prove(exps) {
-  alert("Let's prove this!");
-  console.log(exps);
+  //check for invalitating truth assignments
+  var assignments = VariableManager.getTruthAssignments();
+  var premsContradict = true;
+  var invalidArgument = false;
+  for (var i = 0; i < assignments.length; i++) {
+    var assign = assignments[i];
+    switch (satisfies(exps, assign)) {
+      case 1:
+        premsContradict = false;
+        break;
+      case -1:
+        invalidArgument = assign;
+    }
+  }
+  if (invalidArgument == false) {
+    console.log("Argument is valid");
+  } else {
+    console.log("Invalidating Assignment: " + invalidArgument);
+  }
+  console.log("Predicates contradict: " + premsContradict);
+}
+
+function satisfies(exps, assignment) {
+  //return true if exps[0] is true, or if premises are false
+  var conc = exps[0].evaluate(assignment);
+  var prems = new AndExpression(exps.splice(1)).evaluate(assignment);
+  console.log(conc);
+  console.log(prems);
+  if (prems && conc) {
+    return 1; //true, prems true, conc true
+  } else if (!prems) {
+    return 0; //still true, cos prems = false
+  } else if (prems && !conc) {
+    return -1; //invalid truth assignment
+  }
+  //should never reach here
+  throw "Satisfaction Error";
 }

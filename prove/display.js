@@ -1,26 +1,26 @@
 const Display = new function() {
-  var predicateCount = 1;
+  var premiseCount = 1;
   this.getNumPreds = function() {
-    return predicateCount;
+    return premiseCount;
   }
   this.addPredicate = function() {
-    predicateCount++;
+    premiseCount++;
     var prev = document.getElementById('fading');
     prev.classList.remove('fading');
-    prev.setAttribute('id', "predicate" + (predicateCount));
+    prev.setAttribute('id', "premise" + (premiseCount));
     var prevInput = prev.getElementsByTagName('input')[0];
     prevInput.removeAttribute('tabindex');
     prevInput.removeAttribute('onclick');
     prevInput.setAttribute('oninput', "validate(this)");
     prevInput.setAttribute('onkeydown', "Display.keyPress(this);");
-    prevInput.setAttribute('data-pred', predicateCount);
-    document.getElementById('predicates').appendChild(newPredicateFade());
+    prevInput.setAttribute('data-prem', premiseCount);
+    document.getElementById('premises').appendChild(newPredicateFade());
   };
   var newPredicateFade = function() {
     var newPred = document.createElement('div');
     newPred.setAttribute('class', "input-group mb-3 fading");
     newPred.setAttribute('id', "fading");
-    newPred.appendChild(newPrepend(predicateCount + 1));
+    newPred.appendChild(newPrepend(premiseCount + 1));
     newPred.appendChild(newPredicateInput());
     return newPred;
   };
@@ -37,27 +37,27 @@ const Display = new function() {
     var newInput = document.createElement('input');
     newInput.setAttribute('type', "text");
     newInput.setAttribute('class', "form-control");
-    newInput.setAttribute('placeholder', "predicate");
+    newInput.setAttribute('placeholder', "premise");
     newInput.setAttribute('aria-label', "Predicate");
     newInput.setAttribute('tabindex', "-1");
     newInput.setAttribute('onclick', "Display.addPredicate()");
     return newInput;
   };
   this.keyPress = function(div) {
-    var id = parseInt(div.getAttribute('data-pred'));
+    var id = parseInt(div.getAttribute('data-prem'));
     var keycode = (event.keyCode ? event.keyCode : event.which);
     switch (keycode) {
       case 13:
         //enter
         this.addPredicate();
-        //focus on the next predicateElement
-        document.getElementById("predicate" + (id + 1)).getElementsByTagName('input')[0].focus();
+        //focus on the next premiseElement
+        document.getElementById("premise" + (id + 1)).getElementsByTagName('input')[0].focus();
         //shift all the inputs down
-        for (var i = predicateCount; i > id + 1; i--) {
+        for (var i = premiseCount; i > id + 1; i--) {
           var fromIdx = i - 1;
           var toIdx = i;
-          var fromInput = document.getElementById("predicate" + fromIdx).getElementsByTagName('input')[0];
-          var toInput = document.getElementById("predicate" + toIdx).getElementsByTagName('input')[0];
+          var fromInput = document.getElementById("premise" + fromIdx).getElementsByTagName('input')[0];
+          var toInput = document.getElementById("premise" + toIdx).getElementsByTagName('input')[0];
           toInput.value = fromInput.value;
           fromInput.value = "";
         }
@@ -69,24 +69,24 @@ const Display = new function() {
         }
         //backspace
         if (div.value.length == 0) {
-          var predicates = document.getElementById("predicates");
-          var toRemove = document.getElementById("predicate" + id);
-          predicates.removeChild(toRemove);
+          var premises = document.getElementById("premises");
+          var toRemove = document.getElementById("premise" + id);
+          premises.removeChild(toRemove);
 
-          //update predicateIds afterwards
-          for (var i = id + 1; i < predicateCount + 1; i++) {
+          //update premiseIds afterwards
+          for (var i = id + 1; i < premiseCount + 1; i++) {
             //rename i to i-1
-            var following = document.getElementById("predicate" + i);
+            var following = document.getElementById("premise" + i);
             following.getElementsByTagName('span')[0].innerHTML = (i - 1);
-            following.setAttribute('id', "predicate" + (i - 1));
+            following.setAttribute('id', "premise" + (i - 1));
             var input = following.getElementsByTagName('input')[0];
-            input.setAttribute('data-pred', (i - 1));
+            input.setAttribute('data-prem', (i - 1));
           }
           //update fading
           var fading = document.getElementById('fading');
-          fading.getElementsByTagName('span')[0].innerHTML = predicateCount--;
-          //focus on the previous predicate
-          var previous = document.getElementById("predicate" + (id - 1));
+          fading.getElementsByTagName('span')[0].innerHTML = premiseCount--;
+          //focus on the previous premise
+          var previous = document.getElementById("premise" + (id - 1));
           previous.getElementsByTagName("input")[0].focus();
           event.preventDefault();
         }

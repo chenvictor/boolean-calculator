@@ -38,4 +38,24 @@ const VariableManager = new function() {
   this.clear = function() {
     variables = [];
   }
+
+  this.getTruthAssignments = function() {
+    //return every possible combination of variable T/F
+    var states = [{}];
+    for (var i = 0; i < variables.length; i++) {
+      var varName = variables[i].variableName;
+      var newStates = [];
+      for (var j = 0; j < states.length; j++) {
+        var state = states[j];
+        var trueDict = {};
+        trueDict[varName] = true;
+        var falseDict = {};
+        falseDict[varName] = false;
+        newStates.push($.extend(trueDict, state));
+        newStates.push($.extend(falseDict, state));
+      }
+      states = newStates;
+    }
+    return states;
+  }
 }
