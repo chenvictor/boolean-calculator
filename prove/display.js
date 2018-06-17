@@ -1,9 +1,13 @@
 const Display = new function() {
   var premiseCount = 1;
+  var editable = true;
   this.getNumPreds = function() {
     return premiseCount;
   }
   this.addPredicate = function() {
+    if (!editable) {
+      return; //do nothing
+    }
     premiseCount++;
     var prev = document.getElementById('fading');
     prev.classList.remove('fading');
@@ -44,6 +48,9 @@ const Display = new function() {
     return newInput;
   };
   this.keyPress = function(div) {
+    if (!editable) {
+      return; //do nothing
+    }
     var id = parseInt(div.getAttribute('data-prem'));
     var keycode = (event.keyCode ? event.keyCode : event.which);
     switch (keycode) {
@@ -97,9 +104,22 @@ const Display = new function() {
     setOutput(title, text);
     this.setOutputVisible();
   };
+  this.validArgument = function(premsContradict) {
+    var outputString = (premsContradict ? "Premises Contradict" : "");
+    setOutput("Argument is Valid", outputString);
+    this.setOutputVisible();
+  }
   this.assignment = function(assignment) {
-    var assignString = "test";
-    setOutput("Invalidating Variable Assignment: ", assignString);
+    var assignString = "";
+    var keys = Object.keys(assignment);
+    keys.sort();
+    for (var i = 0; i < keys.length; i++) {
+      var key = keys[i];
+      var val = assignment[key];
+      val = (val ? "T" : "F");
+      assignString += key + ": " + val + " ";
+    }
+    setOutput("Argument is Invalid", "Invalid Assignment  -  " + assignString);
     this.setOutputVisible();
   };
   var setOutput = function(title, text) {
@@ -118,6 +138,54 @@ const Display = new function() {
       document.getElementById("collapseOutput").classList.remove('show');
     }
   };
+  this.setEditable = function(canEdit = true) {
+    editable = canEdit;
+    //hide fading
+    var fading = document.getElementById('fading');
+    if (canEdit) {
+      fading.removeAttribute('hidden');
+    } else {
+      fading.setAttribute('hidden', '');
+    }
+    //disable editing Premises
+    for (var i = 1; i <= premiseCount; i++) {
+      var premiseDiv = document.getElementById("premise" + i);
+      var premiseInput = premiseDiv.getElementsByTagName('input')[0];
+      if (canEdit) {
+        premiseInput.removeAttribute('disabled');
+      } else {
+        premiseInput.setAttribute('disabled', '');
+      }
+    }
+    //disable editing conclusion
+    var concInput = document.getElementById('conclusion').getElementsByTagName('input')[0];
+    if (canEdit) {
+      concInput.removeAttribute('disabled');
+    } else {
+      concInput.setAttribute('disabled', '');
+    }
+  };
+
+  this.showGoButton = function() {
+    setButton(true);
+  };
+  this.showBackButton = function() {
+    setButton(false);
+  };
+
+  var setButton = function(isGo) {
+    var goButton = document.getElementById('buttonProve');
+    var backButton = document.getElementById('buttonBack');
+    if (isGo) {
+      goButton.removeAttribute('hidden');
+      backButton.setAttribute('hidden', '');
+      goButton.focus();
+    } else {
+      goButton.setAttribute('hidden', '');
+      backButton.removeAttribute('hidden');
+      backButton.focus();
+    }
+  }
 
 
 }

@@ -29,7 +29,15 @@ function goClicked() {
   if (!isValid(parsedExpressions)) {
     return;
   }
+  Display.showBackButton();
+  Display.setEditable(false);
   prove(parsedExpressions);
+}
+
+function backClicked() {
+  Display.showGoButton();
+  Display.setEditable(true);
+  Display.setOutputVisible(false);
 }
 
 function getParsed() {
@@ -93,8 +101,11 @@ function prove(exps) {
   if (invalidatingAssignment == null) {
     console.log("Argument is valid");
     console.log("Predicates contradict: " + premsContradict);
+    Display.validArgument(premsContradict);
   } else {
+    //show invalidating assignment
     console.log("Invalidating Assignment: " + invalidatingAssignment);
+    Display.assignment(invalidatingAssignment);
   }
 }
 
