@@ -4,22 +4,27 @@ const Inference = new function() {
     //return a list of steps, or return
     var toProve = exps.shift(); //Initial statement to prove
     var prems = exps.concat(); //Initial predicates
-    console.log(toProve);
-    console.log(prems);
     var inters = []; //Intermediary steps used
+    var interLaws = [];
     var loopCounter = 0;
+    var lineCounter = -1;
     while (true) {
       var idx = search(toProve, prems, inters);
-      if (idx != -1) {
+      if (idx != 0) {
         //toProve is in premises, we are done
+        //add this line# to last result
+        if (interLaws.length != 0) {
+          interLaws[interLaws.length - 1][1][1] = idx;
+        }
         break;
       }
       for (var i = 0; i < InferenceLaws.length; i++) {
         var law = InferenceLaws[i];
         var result = applyAll(toProve, prems, inters, law);
-        if (result != false) {
+        if (result[0] != false) {
           inters.push(toProve);
-          toProve = result;
+          interLaws.push([law, [result[1], lineCounter--]]);
+          toProve = result[0];
         }
       }
       if (++loopCounter >= 200) {
@@ -27,23 +32,23 @@ const Inference = new function() {
         break;
       }
     }
-    console.log("Proven");
-    console.log("Intermediate Steps: " + inters);
+    return [inters, interLaws];
   };
 
   var applyAll = function(toProve, prems, inters, law) {
+    //return [newToProve, lineUsed]
     for (var i = 0; i < prems.length; i++) {
       var exp = prems[i];
       var result = law.apply(toProve, exp);
       if (result != false) {
-        return result;
+        return [result, i + 1];
       }
     }
     for (var i = 0; i < inters.length; i++) {
       var exp = inters[i];
       var result = law.apply(toProve, exp);
       if (result != false) {
-        return result;
+        return [result, -1 - i];
       }
     }
     return false;
@@ -67,28 +72,28 @@ const Inference = new function() {
         //Not applicable
         return false;
       };
-      this.getLawName = function() {
+      this.toString = function() {
         return "M.PON";
       };
     })
   ];
 
-  // Return 'index' of toFind
-  // if not found, returns -1
+  // Return 'index' of toFind, 1 based
+  // if not found, returns 0
   var search = function(toFind, prems, inters) {
     for (var i = 0; i < prems.length; i++) {
       var exp = prems[i];
       if (exp.equals(toFind)) {
-        return i;
+        return i + 1;
       }
     }
     for (var i = 0; i < inters.length; i++) {
       var exp = inters[i];
       if (exp.equals(toFind)) {
-        return i + prems.length;
+        return -1 - i;
       }
     }
-    return -1;
+    return 0;
   }
   this.test = function() {
     return InferenceLaws;

@@ -38,6 +38,7 @@ function backClicked() {
   Display.showGoButton();
   Display.setEditable(true);
   Display.setOutputVisible(false);
+  Display.setStepsVisible(false);
 }
 
 function getParsed() {
@@ -50,7 +51,7 @@ function getParsed() {
   } catch (e) {
     exps.push(e);
   }
-  for (var i = 1; i <= Display.getNumPreds(); i++) {
+  for (var i = 1; i <= Display.getNumPrems(); i++) {
     var premDiv = document.getElementById("premise" + i);
     var premInput = premDiv.getElementsByTagName('input')[0].value.toString();
     try {
@@ -70,7 +71,7 @@ function isValid(parsedExpressions) {
         Display.error("Conclusion invalid: ", exp);
         $("#cInput").focus();
       } else {
-        Display.error("Predicate #" + i + " invalid: ", exp);
+        Display.error("Premise #" + i + " invalid: ", exp);
         document.getElementsByTagName('input')[i - 1].focus();
       }
       return false;
@@ -101,12 +102,33 @@ function prove(exps) {
   if (invalidatingAssignment == null) {
     Display.validArgument(premsContradict);
     if (!premsContradict) {
-      Inference.prove(exps);
+      var steps = Inference.prove(exps);
+      showSteps(steps);
     }
   } else {
     //show invalidating assignment
     Display.assignment(invalidatingAssignment);
   }
+}
+
+function showSteps(steps) {
+  Display.clearSteps();
+  var inters = steps[0];
+  var interLaws = steps[1];
+  var totalLineCount = Display.getNumPrems() + inters.length;
+  for (var i = inters.length - 1; i >= 0; i--) {
+    //adding steps backwards
+    var inter = inters[i];
+    var interLaw = interLaws[i];
+    var refNum = interLaw[1];
+    for (var j = 0; j < refNum.length; j++) {
+      if (refNum[j] < 0) {
+        refNum[j] += totalLineCount;
+      }
+    }
+    Display.addStep(inter, interLaw);
+  }
+  Display.setStepsVisible();
 }
 
 function satisfies(exps, assignment) {

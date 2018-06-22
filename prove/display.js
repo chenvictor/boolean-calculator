@@ -1,10 +1,12 @@
 const Display = new function() {
   var premiseCount = 1;
   var editable = true;
-  this.getNumPreds = function() {
+
+  //Premises
+  this.getNumPrems = function() {
     return premiseCount;
   }
-  this.addPredicate = function() {
+  this.addPremise = function() {
     if (!editable) {
       return; //do nothing
     }
@@ -18,14 +20,14 @@ const Display = new function() {
     prevInput.setAttribute('oninput', "validate(this)");
     prevInput.setAttribute('onkeydown', "Display.keyPress(this);");
     prevInput.setAttribute('data-prem', premiseCount);
-    document.getElementById('premises').appendChild(newPredicateFade());
+    document.getElementById('premises').appendChild(newPremiseFade());
   };
-  var newPredicateFade = function() {
+  var newPremiseFade = function() {
     var newPred = document.createElement('div');
     newPred.setAttribute('class', "input-group mb-3 fading");
     newPred.setAttribute('id', "fading");
     newPred.appendChild(newPrepend(premiseCount + 1));
-    newPred.appendChild(newPredicateInput());
+    newPred.appendChild(newPremiseInput());
     return newPred;
   };
   var newPrepend = function(text) {
@@ -37,16 +39,88 @@ const Display = new function() {
     newPrep.appendChild(span);
     return newPrep;
   };
-  var newPredicateInput = function() {
+  var newPremiseInput = function() {
     var newInput = document.createElement('input');
     newInput.setAttribute('type', "text");
     newInput.setAttribute('class', "form-control");
     newInput.setAttribute('placeholder', "premise");
-    newInput.setAttribute('aria-label', "Predicate");
+    newInput.setAttribute('aria-label', "Premise");
     newInput.setAttribute('tabindex', "-1");
-    newInput.setAttribute('onclick', "Display.addPredicate()");
+    newInput.setAttribute('onclick', "Display.addPremise()");
     return newInput;
   };
+
+  //Steps
+  var stepCounter = 1;
+  this.clearSteps = function() {
+    //reset div
+    var stepsDiv = document.getElementById('steps');
+    stepsDiv.innerHTML = "";
+    var title = document.createElement("h3");
+    title.innerHTML = "Steps:";
+    stepsDiv.appendChild(title);
+    //reset Counter
+    stepCounter = 1;
+  };
+  this.setStepsVisible = function(visible = true) {
+    $('#steps').collapse(
+      (visible ? 'show' : 'hide')
+    );
+  };
+  this.addStep = function(inter, interLaw) {
+    var interLawString = interLaw[0].toString() + ", Line #" + interLaw[1];
+    var div = createStepDiv(premiseCount + (stepCounter++), inter, interLawString);
+    document.getElementById('steps').appendChild(div);
+  };
+
+  var createStepDiv = function(lineNum, line, lawString) {
+    var div = document.createElement('div');
+    div.setAttribute('class', "input-group mb-3");
+
+    var prependDiv = createPrepend(lineNum);
+
+    var input = createDisplayInput(line);
+
+    var appendDiv = createAppend(lawString);
+
+    div.appendChild(prependDiv);
+    div.appendChild(input);
+    div.appendChild(appendDiv);
+
+    return div;
+  };
+
+  var createPrepend = function(lineNum) {
+    var prependDiv = document.createElement('div');
+    prependDiv.setAttribute('class', "input-group-prepend");
+    var prependSpan = document.createElement('span');
+    prependSpan.setAttribute('class', "input-group-text");
+    prependSpan.innerHTML = lineNum;
+    prependDiv.appendChild(prependSpan);
+    return prependDiv;
+  };
+
+  var createDisplayInput = function(line) {
+    var input = document.createElement('input');
+    input.setAttribute('type', "text");
+    input.setAttribute('class', "form-control");
+    input.setAttribute('placeholder', "step");
+    input.setAttribute('aria-label', "Step");
+    input.setAttribute('disabled', true);
+    input.value = line.toString();
+    return input;
+  };
+
+  var createAppend = function(lawString) {
+    var appendDiv = document.createElement('div');
+    appendDiv.setAttribute('class', "input-group-append");
+    var appendSpan = document.createElement('span');
+    appendSpan.setAttribute('class', "input-group-text");
+    appendSpan.innerHTML = lawString;
+    appendDiv.appendChild(appendSpan);
+    return appendDiv;
+  }
+
   this.keyPress = function(div) {
     if (!editable) {
       return; //do nothing
@@ -56,7 +130,7 @@ const Display = new function() {
     switch (keycode) {
       case 13:
         //enter
-        this.addPredicate();
+        this.addPremise();
         //focus on the next premiseElement
         document.getElementById("premise" + (id + 1)).getElementsByTagName('input')[0].focus();
         //shift all the inputs down
@@ -138,6 +212,7 @@ const Display = new function() {
       document.getElementById("collapseOutput").classList.remove('show');
     }
   };
+
   this.setEditable = function(canEdit = true) {
     editable = canEdit;
     //hide fading
@@ -186,6 +261,4 @@ const Display = new function() {
       backButton.focus();
     }
   }
-
-
 }
