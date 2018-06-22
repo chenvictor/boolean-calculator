@@ -99,12 +99,12 @@ function prove(exps) {
     }
   }
   if (invalidatingAssignment == null) {
-    console.log("Argument is valid");
-    console.log("Predicates contradict: " + premsContradict);
     Display.validArgument(premsContradict);
+    if (!premsContradict) {
+      Inference.prove(exps);
+    }
   } else {
     //show invalidating assignment
-    console.log("Invalidating Assignment: " + invalidatingAssignment);
     Display.assignment(invalidatingAssignment);
   }
 }
