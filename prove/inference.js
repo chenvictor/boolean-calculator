@@ -1,5 +1,6 @@
 const Inference = new function() {
   this.prove = function(exps) {
+    console.clear();
     //exps[0] is conclusion
     //return a list of steps
     var toProve = exps.shift(); //Initial statement to prove
@@ -63,7 +64,23 @@ const Inference = new function() {
       // p
       // -----
       // p or ...
-
+      var newInters = inters.concat();
+      newInters.push(toProve);
+      var newInterLaws = interLaws.concat();
+      newInterLaws.push(['GEN', [lineCounter--]]);
+      for (let subset of Utils.powerSetIter(toProve.subs)) {
+        var sub = new OrExpression(subset);
+        if (subset.length == 0 || subset.length == toProve.subs.length) {
+          continue;
+        } else if (subset.length == 1) {
+          sub = subset[0];
+        }
+        //try proving the sub
+        var deeperResult = prove(sub, prems, newInters, newInterLaws, lineCounter, recurseCounter);
+        if (deeperResult != false) {
+          return deeperResult;
+        }
+      }
     }
     //No result found
     console.log("Nothing to apply, ejecting branch.");
