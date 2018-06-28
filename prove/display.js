@@ -1,6 +1,34 @@
 const Display = new function() {
-  var premiseCount = 1;
+  const ID_FADE = 'fading';
+  var ID_STEPS;
+  var ID_PREM;
+  var ID_PREMS;
+
+  var premiseCount = 0;
   var editable = true;
+
+  this.setStepsId = function(id) {
+    ID_STEPS = id;
+  };
+  this.setPremiseId = function(id) {
+    ID_PREM = id;
+    ID_PREMS = ID_PREM + 's';
+  }
+  var INIT = false;
+  this.init = function() {
+    if (INIT) {
+      throw "Init cannot be called more than once!";
+    }
+    if (ID_STEPS == null) {
+      throw "Steps ID not yet set! Call Display.setStepsId first.";
+    }
+    if (ID_PREM == null) {
+      throw "Premise ID not yet set! Call Display.setPremiseId first.";
+    }
+    INIT = true;
+    document.getElementById(ID_PREMS).appendChild(newPremiseFade());
+    this.addPremise();
+  }
 
   //Premises
   this.getNumPrems = function() {
@@ -11,21 +39,21 @@ const Display = new function() {
       return; //do nothing
     }
     premiseCount++;
-    var prev = document.getElementById('fading');
-    prev.classList.remove('fading');
-    prev.setAttribute('id', "premise" + (premiseCount));
+    var prev = document.getElementById(ID_FADE);
+    prev.classList.remove(ID_FADE);
+    prev.setAttribute('id', ID_PREM + (premiseCount));
     var prevInput = prev.getElementsByTagName('input')[0];
     prevInput.removeAttribute('tabindex');
     prevInput.removeAttribute('onclick');
     prevInput.setAttribute('oninput', "validate(this)");
     prevInput.setAttribute('onkeydown', "Display.keyPress(this);");
     prevInput.setAttribute('data-prem', premiseCount);
-    document.getElementById('premises').appendChild(newPremiseFade());
+    document.getElementById(ID_PREMS).appendChild(newPremiseFade());
   };
   var newPremiseFade = function() {
     var newPred = document.createElement('div');
     newPred.setAttribute('class', "input-group mb-3 fading");
-    newPred.setAttribute('id', "fading");
+    newPred.setAttribute('id', ID_FADE);
     newPred.appendChild(newPrepend(premiseCount + 1));
     newPred.appendChild(newPremiseInput());
     return newPred;
@@ -43,8 +71,8 @@ const Display = new function() {
     var newInput = document.createElement('input');
     newInput.setAttribute('type', "text");
     newInput.setAttribute('class', "form-control");
-    newInput.setAttribute('placeholder', "premise");
-    newInput.setAttribute('aria-label', "Premise");
+    newInput.setAttribute('placeholder', ID_PREM);
+    newInput.setAttribute('aria-label', ID_PREM);
     newInput.setAttribute('tabindex', "-1");
     newInput.setAttribute('onclick', "Display.addPremise()");
     return newInput;
@@ -54,7 +82,7 @@ const Display = new function() {
   var stepCounter = 1;
   this.clearSteps = function() {
     //reset div
-    var stepsDiv = document.getElementById('steps');
+    var stepsDiv = document.getElementById(ID_STEPS);
     stepsDiv.innerHTML = "";
     var title = document.createElement("h3");
     title.innerHTML = "Steps:";
@@ -63,14 +91,14 @@ const Display = new function() {
     stepCounter = 1;
   };
   this.setStepsVisible = function(visible = true) {
-    $('#steps').collapse(
+    $('#' + ID_STEPS).collapse(
       (visible ? 'show' : 'hide')
     );
   };
   this.addStep = function(inter, interLaw) {
     var interLawString = interLaw[0].toString() + ", Line #" + interLaw[1];
     var div = createStepDiv(premiseCount + (stepCounter++), inter, interLawString);
-    document.getElementById('steps').appendChild(div);
+    document.getElementById(ID_STEPS).appendChild(div);
   };
 
   var createStepDiv = function(lineNum, line, lawString) {
@@ -105,7 +133,7 @@ const Display = new function() {
     input.setAttribute('type', "text");
     input.setAttribute('class', "form-control");
     input.setAttribute('placeholder', "step");
-    input.setAttribute('aria-label', "Step");
+    input.setAttribute('aria-label', "step");
     input.setAttribute('disabled', true);
     input.value = line.toString();
     return input;
@@ -132,13 +160,13 @@ const Display = new function() {
         //enter
         this.addPremise();
         //focus on the next premiseElement
-        document.getElementById("premise" + (id + 1)).getElementsByTagName('input')[0].focus();
+        document.getElementById(ID_PREM + (id + 1)).getElementsByTagName('input')[0].focus();
         //shift all the inputs down
         for (var i = premiseCount; i > id + 1; i--) {
           var fromIdx = i - 1;
           var toIdx = i;
-          var fromInput = document.getElementById("premise" + fromIdx).getElementsByTagName('input')[0];
-          var toInput = document.getElementById("premise" + toIdx).getElementsByTagName('input')[0];
+          var fromInput = document.getElementById(ID_PREM + fromIdx).getElementsByTagName('input')[0];
+          var toInput = document.getElementById(ID_PREM + toIdx).getElementsByTagName('input')[0];
           toInput.value = fromInput.value;
           fromInput.value = "";
         }
@@ -150,24 +178,24 @@ const Display = new function() {
         }
         //backspace
         if (div.value.length == 0) {
-          var premises = document.getElementById("premises");
-          var toRemove = document.getElementById("premise" + id);
+          var premises = document.getElementById(ID_PREMS);
+          var toRemove = document.getElementById(ID_PREM + id);
           premises.removeChild(toRemove);
 
           //update premiseIds afterwards
           for (var i = id + 1; i < premiseCount + 1; i++) {
             //rename i to i-1
-            var following = document.getElementById("premise" + i);
+            var following = document.getElementById(ID_PREM + i);
             following.getElementsByTagName('span')[0].innerHTML = (i - 1);
-            following.setAttribute('id', "premise" + (i - 1));
+            following.setAttribute('id', ID_PREM + (i - 1));
             var input = following.getElementsByTagName('input')[0];
             input.setAttribute('data-prem', (i - 1));
           }
           //update fading
-          var fading = document.getElementById('fading');
+          var fading = document.getElementById(ID_FADE);
           fading.getElementsByTagName('span')[0].innerHTML = premiseCount--;
           //focus on the previous premise
-          var previous = document.getElementById("premise" + (id - 1));
+          var previous = document.getElementById(ID_PREM + (id - 1));
           previous.getElementsByTagName("input")[0].focus();
           event.preventDefault();
         }
@@ -216,7 +244,7 @@ const Display = new function() {
   this.setEditable = function(canEdit = true) {
     editable = canEdit;
     //hide fading
-    var fading = document.getElementById('fading');
+    var fading = document.getElementById(ID_FADE);
     if (canEdit) {
       fading.removeAttribute('hidden');
     } else {
@@ -224,7 +252,7 @@ const Display = new function() {
     }
     //disable editing Premises
     for (var i = 1; i <= premiseCount; i++) {
-      var premiseDiv = document.getElementById("premise" + i);
+      var premiseDiv = document.getElementById(ID_PREM + i);
       var premiseInput = premiseDiv.getElementsByTagName('input')[0];
       if (canEdit) {
         premiseInput.removeAttribute('disabled');

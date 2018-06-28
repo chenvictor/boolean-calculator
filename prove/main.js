@@ -5,7 +5,9 @@ window.addEventListener("load", function() {
       $("#buttonProve").click();
     }
   });
-
+  Display.setStepsId('steps');
+  Display.setPremiseId('premise');
+  Display.init();
 });
 
 
@@ -85,8 +87,7 @@ function prove(exps) {
   var assignments = VariableManager.getTruthAssignments();
   var premsContradict = true;
   var invalidatingAssignment = null;
-  for (var i = 0; i < assignments.length; i++) {
-    var assign = assignments[i];
+  for (let assign of assignments) {
     switch (satisfies(exps, assign)) {
       case 1:
         premsContradict = false;
@@ -145,4 +146,11 @@ function satisfies(exps, assignment) {
   }
   //should never reach here
   throw "Satisfaction Error";
+}
+
+function test() {
+  var array = [1, 2, 3];
+  for (let sub of Utils.powerSetIter(array)) {
+    console.log(sub);
+  }
 }

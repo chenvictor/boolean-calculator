@@ -20,4 +20,18 @@ const Utils = new function() {
     }
     return string;
   }
+
+  //assume input array is a set (no duplicates)
+  this.powerSetIter = function*(array, offset = 0) {
+    while (offset < array.length) {
+      let first = array[offset++];
+      for (let subset of this.powerSetIter(array, offset)) {
+        subset.push(first);
+        yield subset;
+      }
+    }
+    yield [];
+  };
+
+
 };

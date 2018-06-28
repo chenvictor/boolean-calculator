@@ -32,15 +32,14 @@ const Inference = new function() {
       //Return result
       return [inters, interLaws];
     }
+    console.log('Proof continues');
     //Explore branches
     var branches = [];
-    for (var i = 0; i < ReverseInferenceLaws.length; i++) {
-      var law = ReverseInferenceLaws[i];
+    for (let law of ReverseInferenceLaws) {
       console.log("Attempting: " + law.toString());
       var resultBranches = applyAll(toProve, prems, inters, law);
       if (resultBranches.length > 0) {
-        for (var i = 0; i < resultBranches.length; i++) {
-          var result = resultBranches[i];
+        for (let result of resultBranches) {
           //clone inters and interLaws
           var newInters = inters.concat();
           var newInterLaws = interLaws.concat();
@@ -58,6 +57,14 @@ const Inference = new function() {
         }
       }
     }
+    //GEN and SPEC go here, since they need to access more.
+    if (toProve instanceof OrExpression) {
+      //GEN
+      // p
+      // -----
+      // p or ...
+
+    }
     //No result found
     console.log("Nothing to apply, ejecting branch.");
     return false;
@@ -66,18 +73,25 @@ const Inference = new function() {
   var applyAll = function(toProve, prems, inters, law) {
     //return [newToProve, lineUsed]
     var resultBranches = [];
-    for (var i = 0; i < prems.length; i++) {
-      var exp = prems[i];
-      var result = law.apply(toProve, exp);
+    if (law.isSingular()) {
+      var result = law.apply(toProve);
       if (result != false) {
-        resultBranches.push([result, i + 1]);
+        resultBranches.push([result]);
       }
-    }
-    for (var i = 0; i < inters.length; i++) {
-      var exp = inters[i];
-      var result = law.apply(toProve, exp);
-      if (result != false) {
-        resultBranches.push([result, -1 - i]);
+    } else {
+      for (var i = 0; i < prems.length; i++) {
+        var exp = prems[i];
+        var result = law.apply(toProve, exp);
+        if (result != false) {
+          resultBranches.push([result, i + 1]);
+        }
+      }
+      for (var i = 0; i < inters.length; i++) {
+        var exp = inters[i];
+        var result = law.apply(toProve, exp);
+        if (result != false) {
+          resultBranches.push([result, -1 - i]);
+        }
       }
     }
     return resultBranches;
@@ -124,8 +138,7 @@ const Inference = new function() {
           if (postExp.equals(postProve) && preProve instanceof OrExpression) {
             if (preProve.contains(preExp)) {
               var remain = [];
-              for (var i = 0; i < preProve.subs.length; i++) {
-                var sub = preProve.subs[i];
+              for (let sub of preProve.subs) {
                 if (!preExp.equals(sub) && !((preExp instanceof OrExpression) && preExp.contains(sub))) {
                   remain.push(sub);
                 }
@@ -224,8 +237,7 @@ const Inference = new function() {
             }
             removes = new AndExpression(removes); //instatiate to take advantage of .contains method
             var keeps = [];
-            for (var i = 0; i < toProve.subs.length; i++) {
-              var sub = toProve.subs[i];
+            for (let sub of toProve.subs) {
               if (removes.contains(sub)) {
                 continue;
               }
@@ -261,8 +273,7 @@ const Inference = new function() {
         if (exp instanceof OrExpression) {
           if (exp.contains(toProve)) {
             var remain = [];
-            for (var i = 0; i < exp.subs.length; i++) {
-              var sub = exp.subs[i];
+            for (let sub of exp.subs) {
               if (!(toProve.equals(sub)) && !((toProve instanceof OrExpression) && toProve.contains(sub))) {
                 remain.push(sub);
               }
