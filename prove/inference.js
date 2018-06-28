@@ -6,62 +6,152 @@ const Inference = new function() {
     var prems = exps.concat(); //Initial predicates
     var inters = []; //Intermediary steps used
     var interLaws = [];
-    var loopCounter = 0;
     var lineCounter = -1;
-    while (true) {
-      var idx = search(toProve, prems, inters);
-      console.log("Search idx: " + idx);
-      if (idx != 0) {
-        //toProve is in premises, we are done
-        //add this line# to last result
-        if (interLaws.length != 0) {
-          var len = interLaws[interLaws.length - 1][1].length;
-          interLaws[interLaws.length - 1][1][len - 1] = idx;
-        }
-        break;
+    var recurseCounter = 0;
+
+    //Initialize helper function
+    return prove(toProve, prems, inters, interLaws, lineCounter, recurseCounter);
+  };
+  var prove = function(toProve, prems, inters, interLaws, lineCounter, recurseCounter) {
+    console.log("ToProve: " + toProve);
+    console.log("Inters: " + inters);
+    if (recurseCounter++ > 50) {
+      throw "Recursion too deep, aborting";
+    }
+    //Initial search
+    var idx = search(toProve, prems, inters);
+    console.log("Idx: " + idx);
+    if (idx != 0) {
+      //toProve is in premises, we are done
+      //add this line# to last result
+      if (interLaws.length != 0) {
+        var len = interLaws[interLaws.length - 1][1].length;
+        interLaws[interLaws.length - 1][1][len - 1] = idx;
       }
-      for (var i = 0; i < InferenceLaws.length; i++) {
-        var law = InferenceLaws[i];
-        console.log("Attempting " + law.toString());
-        var result = applyAll(toProve, prems, inters, law);
-        if (result != false) {
-          inters.push(toProve);
+      console.log("Proof reached.");
+      //Return result
+      return [inters, interLaws];
+    }
+    //Explore branches
+    var branches = [];
+    for (var i = 0; i < ReverseInferenceLaws.length; i++) {
+      var law = ReverseInferenceLaws[i];
+      console.log("Attempting: " + law.toString());
+      var resultBranches = applyAll(toProve, prems, inters, law);
+      if (resultBranches.length > 0) {
+        for (var i = 0; i < resultBranches.length; i++) {
+          var result = resultBranches[i];
+          //clone inters and interLaws
+          var newInters = inters.concat();
+          var newInterLaws = interLaws.concat();
+
+          newInters.push(toProve);
           if (law.isSingular()) {
-            interLaws.push([law, [result[1]]]);
+            newInterLaws.push([law, [result[1]]]);
           } else {
-            interLaws.push([law, [result[1], lineCounter--]]);
+            newInterLaws.push([law, [result[1], lineCounter--]]);
           }
-          toProve = result[0];
+          var deeperResult = prove(result[0], prems, newInters, newInterLaws, lineCounter, recurseCounter);
+          if (deeperResult != false) {
+            return deeperResult;
+          }
         }
-      }
-      if (++loopCounter >= 50) {
-        console.log("Loop Counter exceeded.");
-        break;
       }
     }
-    return [inters, interLaws];
+    //No result found
+    console.log("Nothing to apply, ejecting branch.");
+    return false;
   };
 
   var applyAll = function(toProve, prems, inters, law) {
     //return [newToProve, lineUsed]
+    var resultBranches = [];
     for (var i = 0; i < prems.length; i++) {
       var exp = prems[i];
       var result = law.apply(toProve, exp);
       if (result != false) {
-        return [result, i + 1];
+        resultBranches.push([result, i + 1]);
       }
     }
     for (var i = 0; i < inters.length; i++) {
       var exp = inters[i];
       var result = law.apply(toProve, exp);
       if (result != false) {
-        return [result, -1 - i];
+        resultBranches.push([result, -1 - i]);
       }
     }
-    return false;
-  }
+    return resultBranches;
+  };
 
-  const InferenceLaws = [
+  // Return 'index' of toFind, 1 based
+  // if not found, returns 0
+  var search = function(toFind, prems, inters) {
+    for (var i = 0; i < prems.length; i++) {
+      var exp = prems[i];
+      if (exp.equals(toFind)) {
+        return i + 1;
+      }
+    }
+    for (var i = 0; i < inters.length; i++) {
+      var exp = inters[i];
+      if (exp.equals(toFind)) {
+        return -1 - i;
+      }
+    }
+    return 0;
+  }
+  this.test = function() {
+    return ReverseInferenceLaws;
+  };
+
+  const ReverseInferenceLaws = [
+    (new function() {
+      //Cases
+      this.apply = function(toProve, exp) {
+        //return false if cannot be applied
+        //return newToProve, if applied
+        //
+        // p -> r
+        // q -> r
+        // ------
+        // (p v q) -> r
+        if (toProve instanceof IfExpression && exp instanceof IfExpression) {
+          var preProve = toProve.subs[0];
+          var postProve = toProve.subs[1];
+          var preExp = exp.subs[0];
+          var postExp = exp.subs[1];
+
+          if (postExp.equals(postProve) && preProve instanceof OrExpression) {
+            if (preProve.contains(preExp)) {
+              var remain = [];
+              for (var i = 0; i < preProve.subs.length; i++) {
+                var sub = preProve.subs[i];
+                if (!preExp.equals(sub) && !((preExp instanceof OrExpression) && preExp.contains(sub))) {
+                  remain.push(sub);
+                }
+              }
+              var newPre;
+              if (remain.length == 0) {
+                throw "Empty to remain";
+              } else if (remain.length == 1) {
+                newPre = remain[0];
+              } else {
+                newPre = new OrExpression(remain);
+              }
+              return new IfExpression([newPre, postExp]);
+            }
+          }
+        }
+        //Not applicable
+        return false;
+      };
+      this.toString = function() {
+        return "CASE";
+      };
+      this.isSingular = function() {
+        return false;
+      }
+    }),
     (new function() {
       //Modus Ponens
       this.apply = function(toProve, exp) {
@@ -170,7 +260,20 @@ const Inference = new function() {
         // p
         if (exp instanceof OrExpression) {
           if (exp.contains(toProve)) {
-            //TODO
+            var remain = [];
+            for (var i = 0; i < exp.subs.length; i++) {
+              var sub = exp.subs[i];
+              if (!(toProve.equals(sub)) && !((toProve instanceof OrExpression) && toProve.contains(sub))) {
+                remain.push(sub);
+              }
+            }
+            if (remain.length == 0) {
+              throw "To prove length = 0";
+            } else if (remain.length == 1) {
+              return new NotExpression(remain);
+            } else {
+              return new NotExpression([new OrExpression(remain)]);
+            }
           }
         }
         //Not applicable
@@ -182,27 +285,35 @@ const Inference = new function() {
       this.isSingular = function() {
         return false;
       }
+    }),
+    (new function() {
+      //Transitivity
+      this.apply = function(toProve, exp) {
+        //return false if cannot be applied
+        //return newToProve, if applied
+        //
+        // p -> q
+        // q -> r
+        // ------
+        // p -> r
+        if (toProve instanceof IfExpression && exp instanceof IfExpression) {
+          var preProve = toProve.subs[0];
+          var preExp = exp.subs[0];
+          var postProve = toProve.subs[1];
+          var postExp = exp.subs[1];
+          if (postProve.equals(postExp) && !preProve.equals(preExp)) {
+            return new IfExpression([preProve, preExp]);
+          }
+        }
+        //Not applicable
+        return false;
+      };
+      this.toString = function() {
+        return "TRANS";
+      };
+      this.isSingular = function() {
+        return false;
+      }
     })
   ];
-
-  // Return 'index' of toFind, 1 based
-  // if not found, returns 0
-  var search = function(toFind, prems, inters) {
-    for (var i = 0; i < prems.length; i++) {
-      var exp = prems[i];
-      if (exp.equals(toFind)) {
-        return i + 1;
-      }
-    }
-    for (var i = 0; i < inters.length; i++) {
-      var exp = inters[i];
-      if (exp.equals(toFind)) {
-        return -1 - i;
-      }
-    }
-    return 0;
-  }
-  this.test = function() {
-    return InferenceLaws;
-  }
-};
+}
