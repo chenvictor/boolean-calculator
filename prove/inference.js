@@ -53,13 +53,17 @@ const Inference = new function() {
           }
           var deeperResult = prove(result[0], prems, newInters, newInterLaws, lineCounter, recurseCounter);
           if (deeperResult != false) {
-            return deeperResult;
+            branches.push(deeperResult);
           }
         }
       }
     }
-    //GEN and SPEC go here, since they need to access more.
-    if (toProve instanceof OrExpression) {
+    if (branches.length > 0) {
+      return Utils.shortestArray(branches);
+    }
+    //GEN, adv-CONJ, and SPEC go here, since they need to access more variables
+    if (toProve instanceof OrExpression && toProve.fromGen != true) {
+      console.log('Check generalization');
       //GEN
       // p
       // -----
@@ -75,11 +79,67 @@ const Inference = new function() {
         } else if (subset.length == 1) {
           sub = subset[0];
         }
+        sub.fromGen = true; //set this so sub won't be Generalized again.
         //try proving the sub
         var deeperResult = prove(sub, prems, newInters, newInterLaws, lineCounter, recurseCounter);
         if (deeperResult != false) {
-          return deeperResult;
+          branches.push(deeperResult);
         }
+      }
+      if (branches.length > 0) {
+        return Utils.shortestArray(branches);
+      }
+    }
+    if (toProve instanceof AndExpression && toProve.fromConj != true) {
+      console.log('Check advanced conjunction');
+      //Advanced CONJ
+      // ... p
+      // ... q
+      // ----
+      // p and q
+      var newInters = inters.concat();
+      var newInterLaws = interLaws.concat();
+
+      for (let subset of Utils.powerSetIter(toProve.subs)) {
+        var sub = new AndExpression(subset);
+        if (subset.length == 0 || subset.length == toProve.subs.length) {
+          continue;
+        } else if (subset.length == 1) {
+          sub = subset[0];
+        }
+        sub.fromConj = true;
+        //try proving the sub
+        var deeperResult = prove(sub, prems, newInters, newInterLaws, lineCounter--, recurseCounter);
+        if (deeperResult != false) {
+          var newInters = deeperResult[0];
+          var newInterLaws = deeperResult[1];
+          var removeArray = [sub];
+          if (sub instanceof AndExpression) {
+            removeArray = sub.subs;
+          }
+          var newToProve = Utils.setSubtract(toProve.subs, removeArray);
+          if (newToProve.length == 1) {
+            newToProve = newToProve[0];
+          } else {
+            newToProve = new AndExpression(newToProve);
+          }
+          var ret = prove(newToProve, prems, newInters, newInterLaws, lineCounter - (newInterLaws.length + interLaws.length), recurseCounter);
+          if (ret == false) {
+            return false;
+          }
+          //insert CONJ
+          ret[0].splice(-inters.length, 0, toProve);
+          ret[1].splice(-inters.length, 0, ['CONJ', [-newInterLaws.length - 1, -newInterLaws.length]]);
+          return ret;
+        }
+      }
+    }
+    //SPEC
+    var specUlates = prems.concat(inters);
+    for (let i = 0; i < specUlates.length; i++) {
+      let prem = specUlates[i];
+      if (prem instanceof AndExpression) {
+        //try removing that premise, and adding individual
       }
     }
     //No result found

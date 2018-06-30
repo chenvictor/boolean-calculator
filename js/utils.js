@@ -33,5 +33,32 @@ const Utils = new function() {
     yield [];
   };
 
+  //array is an array of arrays
+  this.shortestArray = function(array) {
+    if (array.length == 0) {
+      throw "Array is empty!";
+    }
+    array = array.concat(); //clone the array first
+    array.sort(function(a, b) {
+      if (a.length == b.length) {
+        return 0;
+      } else if (a.length > b.length) {
+        return 1;
+      } else {
+        return -1;
+      }
+    });
+    return array[0];
+  };
+
+  this.setSubtract = function(main, subtract) {
+    var newArray = [];
+    for (let a of main) {
+      if (!subtract.includes(a)) {
+        newArray.push(a);
+      }
+    }
+    return newArray;
+  }
 
 };
