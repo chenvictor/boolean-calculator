@@ -28,6 +28,7 @@ const Display = new function() {
     INIT = true;
     document.getElementById(ID_PREMS).appendChild(newPremiseFade());
     this.addPremise();
+    document.getElementById('premise1').getElementsByTagName('input')[0].focus();
   }
 
   //Premises
