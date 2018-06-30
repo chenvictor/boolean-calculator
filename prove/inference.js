@@ -25,7 +25,7 @@ const Inference = new function() {
     if (idx != 0) {
       //toProve is in premises, we are done
       //add this line# to last result
-      if (interLaws.length != 0) {
+      if (interLaws.length != 0 && interLaws[interLaws.length - 1][0] != "SPEC") {
         var len = interLaws[interLaws.length - 1][1].length;
         interLaws[interLaws.length - 1][1][len - 1] = idx;
       }
@@ -154,7 +154,8 @@ const Inference = new function() {
           var newInterLaws = interLaws.concat();
           for (let inner of sub) {
             newInters.push(inner);
-            newInterLaws.push(['SPEC', [i]])
+            newInterLaws.push(['SPEC', [(i + 1)]]);
+            console.log("SPEC on " + prem + " line " + (i + 1));
           }
           var attempt = prove(toProve, newPrems, newInters, newInterLaws, lineCounter, recurseCounter);
           if (attempt != false) {
@@ -163,35 +164,35 @@ const Inference = new function() {
         }
       }
     }
-    for (let i = 0; i < inters.length; i++) {
-      let inter = inters[i];
-      if (inter instanceof AndExpression) {
-        var subdivisions = Utils.subdivisions(inter.subs);
-        console.log(subdivisions);
-
-        //remove And premise
-        var newInters = inters.concat();
-        newInters[i] = True;
-        for (let sub of subdivisions) {
-          if (sub.length == 0) {
-            //don't care about the empty sub
-            continue;
-          }
-          //add sub
-          var newNewInters = newInters.concat();
-          var newInterLaws = interLaws.concat();
-          for (let inner of sub) {
-            newInters.push(inner);
-            newInterLaws.push(['SPEC', [i]])
-          }
-          var attempt = prove(toProve, prems, newInters, newInterLaws, lineCounter, recurseCounter);
-          if (attempt != false) {
-            return attempt;
-          }
-        }
-
-      }
-    }
+    // for (let i = 0; i < inters.length; i++) {
+    //   let inter = inters[i];
+    //   if (inter instanceof AndExpression) {
+    //     var subdivisions = Utils.subdivisions(inter.subs);
+    //     console.log(subdivisions);
+    //
+    //     //remove And premise
+    //     var newInters = inters.concat();
+    //     newInters[i] = True;
+    //     for (let sub of subdivisions) {
+    //       if (sub.length == 0) {
+    //         //don't care about the empty sub
+    //         continue;
+    //       }
+    //       //add sub
+    //       var newNewInters = newInters.concat();
+    //       var newInterLaws = interLaws.concat();
+    //       for (let inner of sub) {
+    //         newInters.push(inner);
+    //         newInterLaws.push(['SPEC', [i + prems.length - 1]])
+    //       }
+    //       var attempt = prove(toProve, prems, newInters, newInterLaws, lineCounter, recurseCounter);
+    //       if (attempt != false) {
+    //         return attempt;
+    //       }
+    //     }
+    //
+    //   }
+    // }
     //No result found
     console.log("Nothing to apply, ejecting branch.");
     return false;
