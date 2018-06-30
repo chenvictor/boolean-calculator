@@ -114,6 +114,9 @@ function prove(exps) {
 
 function showSteps(steps) {
   Display.clearSteps();
+  if (steps == false) {
+    throw "Could not be proven using Inferences";
+  }
   var inters = steps[0];
   var interLaws = steps[1];
   var totalLineCount = Display.getNumPrems() + inters.length;

@@ -135,11 +135,61 @@ const Inference = new function() {
       }
     }
     //SPEC
-    var specUlates = prems.concat(inters);
-    for (let i = 0; i < specUlates.length; i++) {
-      let prem = specUlates[i];
+    for (let i = 0; i < prems.length; i++) {
+      let prem = prems[i];
       if (prem instanceof AndExpression) {
-        //try removing that premise, and adding individual
+        var subdivisions = Utils.subdivisions(prem.subs);
+        console.log(subdivisions);
+
+        //remove And premise
+        var newPrems = prems.concat();
+        newPrems[i] = True;
+        for (let sub of subdivisions) {
+          if (sub.length == 0) {
+            //don't care about the empty sub
+            continue;
+          }
+          //add sub
+          var newInters = inters.concat();
+          var newInterLaws = interLaws.concat();
+          for (let inner of sub) {
+            newInters.push(inner);
+            newInterLaws.push(['SPEC', [i]])
+          }
+          var attempt = prove(toProve, newPrems, newInters, newInterLaws, lineCounter, recurseCounter);
+          if (attempt != false) {
+            return attempt;
+          }
+        }
+      }
+    }
+    for (let i = 0; i < inters.length; i++) {
+      let inter = inters[i];
+      if (inter instanceof AndExpression) {
+        var subdivisions = Utils.subdivisions(inter.subs);
+        console.log(subdivisions);
+
+        //remove And premise
+        var newInters = inters.concat();
+        newInters[i] = True;
+        for (let sub of subdivisions) {
+          if (sub.length == 0) {
+            //don't care about the empty sub
+            continue;
+          }
+          //add sub
+          var newNewInters = newInters.concat();
+          var newInterLaws = interLaws.concat();
+          for (let inner of sub) {
+            newInters.push(inner);
+            newInterLaws.push(['SPEC', [i]])
+          }
+          var attempt = prove(toProve, prems, newInters, newInterLaws, lineCounter, recurseCounter);
+          if (attempt != false) {
+            return attempt;
+          }
+        }
+
       }
     }
     //No result found

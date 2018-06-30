@@ -59,6 +59,55 @@ const Utils = new function() {
       }
     }
     return newArray;
+  };
+
+  //return an array of possible subdivisions of an array, with most simple first
+  this.subdivisions = function(array) {
+    if (!(array instanceof Array)) {
+      throw "Input is not an Array!";
+    }
+    //most simple if 2 elementAndExp
+    if (array.length == 1) {
+      //base case
+      return [
+        [],
+        [array[0]]
+      ]; //either don't include it, or include it
+    } else {
+      var toRet = [];
+      let first = array[0];
+      let rest = array.slice(1);
+      for (let smaller of this.subdivisions(rest)) {
+        var newRet1 = smaller; //shorter
+        var newRet2 = smaller.concat([first]); //longer
+        //insert the two ret values in the proper spot in the array
+        if (toRet.length == 0) {
+          //simple push
+          toRet.push(newRet1);
+          toRet.push(newRet2);
+        } else {
+          var longerAdded = false;
+          for (let idx = toRet.length - 1; idx >= 0; idx--) { //travelling backwards, so insert longer, then shorter
+            let arrayAt = toRet[idx];
+            if (!longerAdded) {
+              if (newRet2.length >= arrayAt.length) {
+                //good to insert
+                toRet.splice(idx + 1, 0, newRet2);
+                longerAdded = true;
+              }
+            } else {
+              //insert newRet1
+              if (newRet1.length >= arrayAt.length) {
+                //good to insert
+                toRet.splice(idx + 1, 0, newRet1);
+                idx = -1;
+              }
+            }
+          }
+        }
+      }
+      return toRet;
+    }
   }
 
 };
