@@ -5,7 +5,9 @@ window.addEventListener("load", function() {
       $("#buttonProve").click();
     }
   });
-
+  Display.setStepsId('steps');
+  Display.setPremiseId('premise');
+  Display.init();
 });
 
 
@@ -38,6 +40,7 @@ function backClicked() {
   Display.showGoButton();
   Display.setEditable(true);
   Display.setOutputVisible(false);
+  Display.setStepsVisible(false);
 }
 
 function getParsed() {
@@ -50,7 +53,7 @@ function getParsed() {
   } catch (e) {
     exps.push(e);
   }
-  for (var i = 1; i <= Display.getNumPreds(); i++) {
+  for (var i = 1; i <= Display.getNumPrems(); i++) {
     var premDiv = document.getElementById("premise" + i);
     var premInput = premDiv.getElementsByTagName('input')[0].value.toString();
     try {
@@ -70,7 +73,7 @@ function isValid(parsedExpressions) {
         Display.error("Conclusion invalid: ", exp);
         $("#cInput").focus();
       } else {
-        Display.error("Predicate #" + i + " invalid: ", exp);
+        Display.error("Premise #" + i + " invalid: ", exp);
         document.getElementsByTagName('input')[i - 1].focus();
       }
       return false;
@@ -84,8 +87,7 @@ function prove(exps) {
   var assignments = VariableManager.getTruthAssignments();
   var premsContradict = true;
   var invalidatingAssignment = null;
-  for (var i = 0; i < assignments.length; i++) {
-    var assign = assignments[i];
+  for (let assign of assignments) {
     switch (satisfies(exps, assign)) {
       case 1:
         premsContradict = false;
@@ -99,14 +101,38 @@ function prove(exps) {
     }
   }
   if (invalidatingAssignment == null) {
-    console.log("Argument is valid");
-    console.log("Predicates contradict: " + premsContradict);
     Display.validArgument(premsContradict);
+    if (!premsContradict) {
+      var steps = Inference.prove(exps);
+      showSteps(steps);
+    }
   } else {
     //show invalidating assignment
-    console.log("Invalidating Assignment: " + invalidatingAssignment);
     Display.assignment(invalidatingAssignment);
   }
+}
+
+function showSteps(steps) {
+  Display.clearSteps();
+  if (steps == false) {
+    throw "Could not be proven using Inferences";
+  }
+  var inters = steps[0];
+  var interLaws = steps[1];
+  var totalLineCount = Display.getNumPrems() + inters.length;
+  for (var i = inters.length - 1; i >= 0; i--) {
+    //adding steps backwards
+    var inter = inters[i];
+    var interLaw = interLaws[i];
+    var refNum = interLaw[1];
+    for (var j = 0; j < refNum.length; j++) {
+      if (refNum[j] < 0) {
+        refNum[j] += totalLineCount;
+      }
+    }
+    Display.addStep(inter, interLaw);
+  }
+  Display.setStepsVisible();
 }
 
 function satisfies(exps, assignment) {
@@ -123,4 +149,11 @@ function satisfies(exps, assignment) {
   }
   //should never reach here
   throw "Satisfaction Error";
+}
+
+function test() {
+  var array = [1, 2, 3];
+  for (let sub of Utils.powerSetIter(array)) {
+    console.log(sub);
+  }
 }

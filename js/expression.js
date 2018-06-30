@@ -36,7 +36,7 @@ Variable.prototype.toString = function() {
   return this.variableName;
 }
 Variable.prototype.equals = function(object) {
-  if (object.constructor != this.constructor) {
+  if (!(object instanceof Variable)) {
     return false;
   }
   return this.variableName == object.variableName;
@@ -218,4 +218,14 @@ AndExpression.prototype.evaluate = function(variableStates) {
     }
   }
   return true;
+}
+
+function equalsNegation(exp1, exp2) {
+  var neg1 = new NotExpression([exp1]);
+  var neg2 = new NotExpression([exp2]);
+  if (neg1.equals(exp2)) {
+    return true;
+  } else {
+    return neg2.equals(exp1);
+  }
 }
