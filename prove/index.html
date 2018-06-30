@@ -3,16 +3,62 @@
 
 <head>
 
-  <!-- Required meta tags -->
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-  <!-- Bootstrap CSS -->
-  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
-  <!-- Glyphicon CSS -->
-  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-  <!-- Overriding CSS -->
-  <style>
+    <!-- Google fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Slab" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+    <!-- Glyphicon CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Overriding CSS -->
+    <style>
+    body {
+      background-color: #DBF1FF;
+      font-family: 'Roboto', sans-serif;
+      width: 100%;
+      height: 100%;
+    }
+
+    img {
+      opacity: 1;
+      transition: .5s ease;
+      backface-visibility: hidden;
+      padding: 2px 2px;
+    }
+
+    img:hover {
+      opacity: 0.5;
+    }
+
+    .to-simplifier {
+      position: fixed;
+      top: 0;
+    }
+
+    .sp {
+      padding: 2px;
+    }
+
+    .share-card {
+      position: fixed;
+      bottom: 0;
+      width: 200px;
+    }
+
+    #share {
+      color: #FFFFFF;
+    }
+
+    .icon {
+      width: 40px;
+      height 40px;
+    }
+
     .unlink {
       text-decoration: none;
       color: black;
@@ -29,39 +75,81 @@
     }
   </style>
 
-  <title>Boolean Calculator - With Steps!</title>
+    <title>Boolean Calculator - With Steps!</title>
 </head>
 
 <body>
-  <div class="container">
+<!-- Facebook Share Button -->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = 'https://connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v3.0';
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<div id="to-simplifier" align="right">
+    <a href="../simplify/index.html">Simplify a propositional logic statement!&nbsp;</a>
+</div>
+
+<div class="container">
     <!-- Content here -->
+    <br>
+    <div class="row" id="title">
+        <h1 style="font-family: 'Roboto Slab', sans-serif"><b>Boolean Calculator</b></h1>
+    </div>
+    <hr>
     <div class="row" id="header">
-      <h3>Prove the Argument...</h3>
+        <h3>Prove the argument...</h3>
     </div>
     <!-- Input area -->
     <ul class="list-group">
-      <li class="list-group-item" id="premises">
-        <h3>Premises:</h3>
-      </li>
-      <li class="list-group-item collapse" id="steps">
-        <h3>Steps:</h3>
-      </li>
-      <li class="list-group-item" id="conclusion">
-        <h3>Conclusion:</h3>
-        <div class="input-group mb-3">
-          <div class="input-group-prepend">
-            <span class="input-group-text">c</span>
-          </div>
-          <input type="text" class="form-control" placeholder="conclusion" aria-label="Conclusion" oninput="validate(this, 0);" id="cInput">
-          <button type="button" class="btn btn-primary" onclick="goClicked();" id="buttonProve">Go!</button>
-          <button type="button" class="btn btn-secondary" onclick="backClicked();" id="buttonBack" hidden>Back</button>
-        </div>
-        <div class="collapse" id="collapseOutput">
-          <div class="card card-body text-center" id="output">
-          </div>
-        </div>
-      </li>
+        <li class="list-group-item" id="premises">
+            <h3>Premises:</h3>
+        </li>
+        <li class="list-group-item collapse" id="steps">
+          <h3>Steps:</h3>
+        </li>
+        <li class="list-group-item" id="conclusion">
+            <h3>Conclusion:</h3>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">c</span>
+                </div>
+                <input type="text" class="form-control" placeholder="conclusion" aria-label="Conclusion" oninput="validate(this, 0);" id="cInput">
+                <button type="button" class="btn btn-primary" onclick="goClicked();" id="buttonProve">Go!</button>
+                <button type="button" class="btn btn-secondary" onclick="backClicked();" id="buttonBack" hidden>Back</button>
+            </div>
+            <div class="collapse" id="collapseOutput">
+                <div class="card card-body text-center" id="output">
+                </div>
+            </div>
+        </li>
     </ul>
+
+</div>
+<!-- Share -->
+<div class="share-card" id="accordion">
+    <div class="card">
+        <div class="btn btn-warning" id="share" data-toggle="collapse" data-target="#collapseShare" aria-expanded="false" aria-controls="collapseShare">
+            <h6 class="mb-0">Share!</h6>
+        </div>
+
+        <div id="collapseShare" class="collapse" aria-labelledby="share" data-parent="#accordion">
+            <div class="card-body">
+                Found this website helpful? Share it with your friends!
+                <br>
+                <!--<div class="fb-share-button" data-href="https://chenvictor.github.io/boolean-calculator/simplify/" data-layout="button_count" data-size="large" data-mobile-iframe="true"><a target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fchenvictor.github.io%2Fboolean-calculator%2Fsimplify%2F&amp;src=sdkpreparse" class="fb-xfbml-parse-ignore">Share</a></div>-->
+                <!--<a href=""><img class="icon" src="../resources/facebook_logo.png"></a>-->
+                <iframe src="https://www.facebook.com/plugins/share_button.php?href=https%3A%2F%2Fchenvictor.github.io%2Fboolean-calculator%2Fprove%2F&layout=button_count&size=large&mobile_iframe=true&width=84&height=28&appId" width="84" height="28" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowTransparency="true" allow="encrypted-media"></iframe>
+                <br>
+                <a href="https://twitter.com/home?status=Check%20out%20this%20awesome%20boolean%20calculator%20website%3A%20https%3A//chenvictor.github.io/boolean-calculator/prove/" target="_blank"><img class="icon" src="../resources/twitter_logo.png"></a>
+                <a href="mailto:?subject=Boolean%20Calculator%20Website%21&body=Check%20out%20this%20awesome%20boolean%20calculator%20website%3A%20https%3A//chenvictor.github.io/boolean-calculator/prove/"><img class="icon" src="../resources/email.png"></a>
+            </div>
+        </div>
+    </div>
+</div>
 
   </div>
   <!-- jQuery first, then Popper.js, then Bootstrap JS -->
