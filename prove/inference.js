@@ -26,6 +26,7 @@ const Inference = new function() {
       //toProve is in premises, we are done
       //add this line# to last result
       if (interLaws.length != 0 && interLaws[interLaws.length - 1][0] != "SPEC") {
+        //Don't rename SPEC
         var len = interLaws[interLaws.length - 1][1].length;
         interLaws[interLaws.length - 1][1][len - 1] = idx;
       }
