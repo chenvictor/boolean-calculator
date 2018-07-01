@@ -65,7 +65,7 @@ const Inference = new function() {
     //GEN, adv-CONJ, and SPEC go here, since they need to access more variables
     if (toProve instanceof OrExpression && toProve.fromGen != true) {
       console.log('Check generalization');
-      //GEN
+      //GEN or
       // p
       // -----
       // p or ...
@@ -84,14 +84,36 @@ const Inference = new function() {
         //try proving the sub
         var deeperResult = prove(sub, prems, newInters, newInterLaws, lineCounter, recurseCounter);
         if (deeperResult != false) {
-          branches.push(deeperResult);
+          return deeperResult;
+          //branches.push(deeperResult);
         }
       }
       if (branches.length > 0) {
         return Utils.shortestArray(branches);
       }
     }
-    if (toProve instanceof AndExpression && toProve.fromConj != true) {
+    if (toProve instanceof IfExpression) {
+      //GEN imp
+      // p
+      // ----
+      // ... -> p
+      // ~p -> ...
+      var newInters = inters.concat();
+      newInters.push(toProve);
+      var newInterLaws = interLaws.concat();
+      newInterLaws.push(['GEN', [lineCounter--]]);
+      //try proving the right side, or negation of left side
+      var toCheck = [];
+      toCheck.push(negation(toProve.subs[0])); //negation of left side
+      toCheck.push(toProve.subs[1]); //left side
+      for (let check of toCheck) {
+        var deeperResult = prove(check, prems, newInters, newInterLaws, lineCounter, recurseCounter);
+        if (deeperResult != false) {
+          return deeperResult;
+        }
+      }
+    }
+    if (toProve instanceof AndExpression && !toProve.fromConj && !toProve.fromSpec) {
       console.log('Check advanced conjunction');
       //Advanced CONJ
       // ... p
@@ -165,36 +187,35 @@ const Inference = new function() {
         }
       }
     }
-    // for (let i = 0; i < inters.length; i++) {
-    //   let inter = inters[i];
-    //   if (inter instanceof AndExpression) {
-    //     var subdivisions = Utils.subdivisions(inter.subs);
-    //     console.log(subdivisions);
-    //
-    //     //remove And premise
-    //     var newInters = inters.concat();
-    //     newInters[i] = True;
-    //     for (let sub of subdivisions) {
-    //       if (sub.length == 0) {
-    //         //don't care about the empty sub
-    //         continue;
-    //       }
-    //       //add sub
-    //       var newNewInters = newInters.concat();
-    //       var newInterLaws = interLaws.concat();
-    //       for (let inner of sub) {
-    //         newInters.push(inner);
-    //         newInterLaws.push(['SPEC', [i + prems.length - 1]])
-    //       }
-    //       var attempt = prove(toProve, prems, newInters, newInterLaws, lineCounter, recurseCounter);
-    //       if (attempt != false) {
-    //         return attempt;
-    //       }
-    //     }
-    //
-    //   }
-    // }
-    //No result found
+    //TODO: Spec, replace toProve with toProve ^ other variables
+    //SPEC 2
+    if (toProve instanceof Variable) {
+      for (let variable of VariableManager.getVariables()) {
+        if (variable.equals(toProve)) {
+          continue;
+        }
+        var newInters = inters.concat();
+        var newInterLaws = interLaws.concat();
+        newInters.push(toProve);
+        newInterLaws.push(['SPEC', [lineCounter--]]);
+        var newToProve = new AndExpression([toProve, variable]);
+        newToProve.fromSpec = true;
+        console.log('Try proving ' + newToProve);
+        var attempt = prove(newToProve, prems, newInters, newInterLaws, lineCounter, recurseCounter);
+        if (attempt != false) {
+          return attempt;
+          break;
+        }
+      }
+      // var newInters = inters.concat();
+      // var newInterLaws = interLaws.concat();
+      // newInters.push(toProve);
+      // newInterLaws.push(['SPEC', [lineCounter--]]);
+      // var attempt = prove(new AndExpression([toProve, VariableManager.get('y')]), prems, newInters, newInterLaws, lineCounter, recurseCounter);
+      // if (attempt != false) {
+      //   return attempt;
+      // }
+    }
     console.log("Nothing to apply, ejecting branch.");
     return false;
   };
@@ -215,13 +236,13 @@ const Inference = new function() {
           resultBranches.push([result, i + 1]);
         }
       }
-      for (var i = 0; i < inters.length; i++) {
-        var exp = inters[i];
-        var result = law.apply(toProve, exp);
-        if (result != false) {
-          resultBranches.push([result, -1 - i]);
-        }
-      }
+      // for (var i = 0; i < inters.length; i++) {
+      //   var exp = inters[i];
+      //   var result = law.apply(toProve, exp);
+      //   if (result != false) {
+      //     resultBranches.push([result, -1 - i]);
+      //   }
+      // }
     }
     return resultBranches;
   };
@@ -358,7 +379,7 @@ const Inference = new function() {
         // q
         // ------
         // p ^ q
-        if (toProve instanceof AndExpression) {
+        if (toProve instanceof AndExpression && !toProve.fromSpec) {
           if (toProve.contains(exp)) {
             var removes = [exp];
             if (exp instanceof AndExpression) {
@@ -410,7 +431,7 @@ const Inference = new function() {
             if (remain.length == 0) {
               throw "To prove length = 0";
             } else if (remain.length == 1) {
-              return new NotExpression(remain);
+              return negation(remain[0]);
             } else {
               return new NotExpression([new OrExpression(remain)]);
             }
@@ -450,6 +471,103 @@ const Inference = new function() {
       };
       this.toString = function() {
         return "TRANS";
+      };
+      this.isSingular = function() {
+        return false;
+      }
+    }),
+    (new function() {
+      //Cases
+      this.apply = function(toProve, exp) {
+        //return false if cannot be applied
+        //return newToProve, if applied
+        //
+        // p -> r
+        // q -> r
+        // ------
+        // (p or q) -> r
+        if (toProve instanceof IfExpression && exp instanceof IfExpression) {
+          var preProve = toProve.subs[0];
+          var preExp = exp.subs[0];
+          var postProve = toProve.subs[1];
+          var postExp = exp.subs[1];
+          if (postProve.equals(postExp)) {
+            if (preProve instanceof OrExpression) {
+              if (preProve.contains(preExp)) {
+                var expArr = [preExp];
+                if (preExp instanceof OrExpression) {
+                  expArr = preExp.subs;
+                }
+                var temp = Utils.setSubtract(preProve.subs, expArr);
+                var newPre;
+                if (temp.length == 1) {
+                  newPre = temp[0];
+                } else {
+                  newPre = new OrExpression(temp);
+                }
+                return new IfExpression([newPre, postProve]);
+              }
+            }
+          }
+        }
+        //Not applicable
+        return false;
+      };
+      this.toString = function() {
+        return "CASE";
+      };
+      this.isSingular = function() {
+        return false;
+      }
+    }),
+    (new function() {
+      //Resolution
+      this.apply = function(toProve, exp) {
+        //return false if cannot be applied
+        //return newToProve, if applied
+        //
+        // p v q
+        // ~p v r
+        // ------
+        // q v r
+        if (toProve instanceof OrExpression) {
+          var expType;
+          if (exp instanceof OrExpression) {
+            expType = OrExpression;
+          } else if (exp instanceof IfExpression) {
+            expType = IfExpression;
+          } else {
+            return false;
+          }
+          if (toProve.subs.length == 2 && exp.subs.length == 2) {
+            var prove1 = toProve.subs[0];
+            var prove2 = toProve.subs[1];
+            var exp1 = exp.subs[0];
+            var exp2 = exp.subs[1];
+            var newOr = [];
+            if (prove1.equals(exp1)) {
+              newOr.push(negation(exp2));
+              newOr.push(prove2);
+            } else if (prove1.equals(exp2)) {
+              newOr.push(negation(exp1));
+              newOr.push(prove2);
+            } else if (prove2.equals(exp1)) {
+              newOr.push(negation(exp2));
+              newOr.push(prove1);
+            } else if (prove2.equals(exp2)) {
+              newOr.push(negation(exp1));
+              newOr.push(prove1);
+            } else {
+              return false;
+            }
+            return new expType(newOr);
+          }
+        }
+        //Not applicable
+        return false;
+      };
+      this.toString = function() {
+        return "RES";
       };
       this.isSingular = function() {
         return false;

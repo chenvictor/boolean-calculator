@@ -162,7 +162,10 @@ OrExpression.prototype.equals = function(object) {
   if (this.subs.length != object.subs.length) {
     return false;
   }
-  return this.toString() == object.toString();
+  if (this.toString() == object.toString()) {
+    return true;
+  }
+  return this.subs.concat().sort().toString() == object.subs.concat().sort().toString();
 }
 OrExpression.prototype.evaluate = function(variableStates) {
   for (var i = 0; i < this.subs.length; i++) {
@@ -205,9 +208,10 @@ AndExpression.prototype.equals = function(object) {
   if (this.subs.length != object.subs.length) {
     return false;
   }
-  //assume elements are in order
-  return this.toString() == object.toString();
-  //return false;
+  if (this.toString() == object.toString()) {
+    return true;
+  }
+  return this.subs.concat().sort().toString() == object.subs.concat().sort().toString();
 }
 
 AndExpression.prototype.evaluate = function(variableStates) {
@@ -227,5 +231,13 @@ function equalsNegation(exp1, exp2) {
     return true;
   } else {
     return neg2.equals(exp1);
+  }
+}
+
+function negation(exp) {
+  if (exp instanceof NotExpression) {
+    return exp.subs[0];
+  } else {
+    return new NotExpression([exp]);
   }
 }
