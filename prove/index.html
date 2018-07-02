@@ -69,9 +69,23 @@
       color: black;
     }
 
+    /* CSS for Display UI */
+
     .fading {
       -webkit-mask-image: -webkit-gradient(linear, left top,
       left bottom, from(rgba(0, 0, 0, 1)), to(rgba(0, 0, 0, 0)));
+    }
+
+    .highlight {
+      outline: 2px solid DodgerBlue;
+    }
+
+    .input-group-append:hover {
+      cursor: pointer;
+    }
+
+    .input-group-prepend:hover {
+      cursor: default;
     }
   </style>
 
@@ -110,6 +124,18 @@
     <ul class="list-group">
       <li class="list-group-item" id="premises">
         <h3>Premises:</h3>
+        <div class="input-group mb-3" id="premise1">
+          <div class="input-group-prepend">
+            <span class="input-group-text">1</span>
+          </div>
+          <input type="text" class="form-control" placeholder="premise" aria-label="premise" oninput="validate(this)" onkeydown="Display.keyPress(this);" data-prem="1" autofocus>
+        </div>
+        <div class="input-group mb-3 fading" id="fading">
+          <div class="input-group-prepend">
+            <span class="input-group-text">2</span>
+          </div>
+          <input type="text" class="form-control" placeholder="premise" aria-label="premise" tabindex="-1" onclick="Display.addPremise()">
+        </div>
       </li>
       <li class="list-group-item collapse" id="steps">
         <h3>Steps:</h3>

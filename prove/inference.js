@@ -33,7 +33,7 @@ const Inference = new function() {
     //Explore branches
     var branches = [];
     for (let law of ReverseInferenceLaws) {
-      console.log("Attempting: " + law.toString());
+      //console.log("Attempting: " + law.toString());
       var resultBranches = applyAll(toProve, prems, inters, law);
       if (resultBranches.length > 0) {
         for (let result of resultBranches) {
@@ -59,7 +59,6 @@ const Inference = new function() {
     }
     //GEN, adv-CONJ, and SPEC go here, since they need to access more variables
     if (toProve instanceof OrExpression && toProve.fromGen != true) {
-      console.log('Check generalization');
       //GEN or
       // p
       // -----
@@ -109,7 +108,6 @@ const Inference = new function() {
       }
     }
     if (toProve instanceof AndExpression && !toProve.fromConj && !toProve.fromSpec) {
-      console.log('Check advanced conjunction');
       //Advanced CONJ
       // ... p
       // ... q
@@ -157,7 +155,6 @@ const Inference = new function() {
       let prem = prems[i];
       if (prem instanceof AndExpression) {
         var subdivisions = Utils.subdivisions(prem.subs);
-        console.log(subdivisions);
 
         //remove And premise
         var newPrems = prems.concat();
@@ -189,7 +186,7 @@ const Inference = new function() {
         }
       }
     }
-    //TODO: Spec, replace toProve with toProve ^ other variables
+    //Spec, replace toProve with toProve ^ other variables
     //SPEC 2
     if (toProve instanceof Variable) {
       for (let variable of VariableManager.getVariables()) {
@@ -199,12 +196,9 @@ const Inference = new function() {
         var newInters = inters.concat();
         var newInterLaws = interLaws.concat();
         newInters.push(toProve);
-        console.log('spec');
-        console.log(lineCounter);
         newInterLaws.push(['SPEC', [lineCounter]]);
         var newToProve = new AndExpression([toProve, variable]);
         newToProve.fromSpec = true;
-        console.log('Try proving ' + newToProve);
         var attempt = prove(newToProve, prems, newInters, newInterLaws, lineCounter - 1, recurseCounter);
         if (attempt != false) {
           return attempt;
@@ -220,7 +214,6 @@ const Inference = new function() {
       //   return attempt;
       // }
     }
-    console.log("Nothing to apply, ejecting branch.");
     return false;
   };
 

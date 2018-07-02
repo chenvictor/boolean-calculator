@@ -1,35 +1,12 @@
 const Display = new function() {
   const ID_FADE = 'fading';
-  var ID_STEPS;
-  var ID_PREM;
-  var ID_PREMS;
+  const ID_STEP = "step";
+  const ID_STEPS = "steps";
+  const ID_PREM = "premise";
+  const ID_PREMS = "premises";
 
-  var premiseCount = 0;
+  var premiseCount = 1;
   var editable = true;
-
-  this.setStepsId = function(id) {
-    ID_STEPS = id;
-  };
-  this.setPremiseId = function(id) {
-    ID_PREM = id;
-    ID_PREMS = ID_PREM + 's';
-  }
-  var INIT = false;
-  this.init = function() {
-    if (INIT) {
-      throw "Init cannot be called more than once!";
-    }
-    if (ID_STEPS == null) {
-      throw "Steps ID not yet set! Call Display.setStepsId first.";
-    }
-    if (ID_PREM == null) {
-      throw "Premise ID not yet set! Call Display.setPremiseId first.";
-    }
-    INIT = true;
-    document.getElementById(ID_PREMS).appendChild(newPremiseFade());
-    this.addPremise();
-    document.getElementById('premise1').getElementsByTagName('input')[0].focus();
-  }
 
   //Premises
   this.getNumPrems = function() {
@@ -97,13 +74,14 @@ const Display = new function() {
     );
   };
   this.addStep = function(inter, interLaw) {
-    var interLawString = interLaw[0].toString() + ", Line #" + interLaw[1];
-    var div = createStepDiv(premiseCount + (stepCounter++), inter, interLawString);
+    var div = createStepDiv(premiseCount + (stepCounter++), inter, interLaw);
     document.getElementById(ID_STEPS).appendChild(div);
   };
 
-  var createStepDiv = function(lineNum, line, lawString) {
+  var createStepDiv = function(lineNum, line, interLaw) {
+    var lawString = interLaw[0].toString() + ", Line #" + interLaw[1];
     var div = document.createElement('div');
+    div.setAttribute('id', ID_STEP + lineNum);
     div.setAttribute('class', "input-group mb-3");
 
     var prependDiv = createPrepend(lineNum);
@@ -111,6 +89,12 @@ const Display = new function() {
     var input = createDisplayInput(line);
 
     var appendDiv = createAppend(lawString);
+    appendDiv.addEventListener("mouseover", function() {
+      Display.setHighlight(interLaw[1]);
+    });
+    appendDiv.addEventListener("mouseout", function() {
+      Display.clearHighlight();
+    });
 
     div.appendChild(prependDiv);
     div.appendChild(input);
@@ -133,8 +117,8 @@ const Display = new function() {
     var input = document.createElement('input');
     input.setAttribute('type', "text");
     input.setAttribute('class', "form-control");
-    input.setAttribute('placeholder', "step");
-    input.setAttribute('aria-label', "step");
+    input.setAttribute('placeholder', ID_STEP);
+    input.setAttribute('aria-label', ID_STEP);
     input.setAttribute('disabled', true);
     input.value = line.toString();
     return input;
@@ -277,12 +261,49 @@ const Display = new function() {
     setButton(false);
   };
 
+  var prevHighlightLines = [];
+  this.setHighlight = function(lineNums) {
+    //Unhighlight previous lineNums
+    for (let line of prevHighlightLines) {
+      var div = document.getElementById(getLineId(line));
+      try {
+        div.classList.remove("highlight");
+      } catch (e) {
+        console.log('Highlight error: Line #' + line + " does not exist");
+      }
+    }
+    prevHighlightLines = [];
+    //Highlight lineNums
+    for (let line of lineNums) {
+      var div = document.getElementById(getLineId(line));
+      try {
+        div.classList.add("highlight");
+        prevHighlightLines.push(line);
+      } catch (e) {
+        console.log('Highlight error: Line #' + line + " does not exist");
+      }
+    }
+  }
+  this.clearHighlight = function() {
+    this.setHighlight([]);
+  }
+
+  var getLineId = function(lineNum) {
+    //returns predicateLineNum or stepLineNum
+    if (lineNum > premiseCount) {
+      return ID_STEP + lineNum;
+    } else {
+      return ID_PREM + lineNum;
+    }
+  }
+
   var setButton = function(isGo) {
     var goButton = document.getElementById('buttonProve');
     var backButton = document.getElementById('buttonBack');
     if (isGo) {
       goButton.removeAttribute('hidden');
       backButton.setAttribute('hidden', '');
+      Display.clearHighlight();
       goButton.focus();
     } else {
       goButton.setAttribute('hidden', '');

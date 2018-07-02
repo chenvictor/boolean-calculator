@@ -5,9 +5,6 @@ window.addEventListener("load", function() {
       $("#buttonProve").click();
     }
   });
-  Display.setStepsId('steps');
-  Display.setPremiseId('premise');
-  Display.init();
 });
 
 
