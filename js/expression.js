@@ -136,7 +136,7 @@ function OrExpression(subs) {
 }
 
 OrExpression.prototype.toString = function() {
-  return Utils.parenthesize(Utils.arrayToString(this.subs, SYMBOL.OR));
+  return Utils.parenthesize(Utils.arrayToString(this.subs, " " + SYMBOL.OR + " "));
 }
 OrExpression.prototype.contains = function(object) {
   if (!(object instanceof OrExpression)) {
@@ -182,7 +182,7 @@ function AndExpression(subs) {
 }
 
 AndExpression.prototype.toString = function() {
-  return Utils.parenthesize(Utils.arrayToString(this.subs, SYMBOL.AND));
+  return Utils.parenthesize(Utils.arrayToString(this.subs, " " + SYMBOL.AND + " "));
 }
 AndExpression.prototype.contains = function(object) {
   if (!(object instanceof AndExpression)) {

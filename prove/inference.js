@@ -14,14 +14,11 @@ const Inference = new function() {
     return prove(toProve, prems, inters, interLaws, lineCounter, recurseCounter);
   };
   var prove = function(toProve, prems, inters, interLaws, lineCounter, recurseCounter) {
-    console.log("ToProve: " + toProve);
-    console.log("Inters: " + inters);
     if (recurseCounter++ > 50) {
       throw "Recursion too deep, aborting";
     }
     //Initial search
     var idx = search(toProve, prems, inters);
-    console.log("Idx: " + idx);
     if (idx != 0) {
       //toProve is in premises, we are done
       //add this line# to last result
@@ -30,11 +27,9 @@ const Inference = new function() {
         var len = interLaws[interLaws.length - 1][1].length;
         interLaws[interLaws.length - 1][1][len - 1] = idx;
       }
-      console.log("Proof reached.");
       //Return result
       return [inters, interLaws];
     }
-    console.log('Proof continues');
     //Explore branches
     var branches = [];
     for (let law of ReverseInferenceLaws) {
@@ -175,13 +170,20 @@ const Inference = new function() {
           //add sub
           var newInters = inters.concat();
           var newInterLaws = interLaws.concat();
-          for (let inner of sub) {
+          var idx = inters.length;
+          for (let inner of sub.concat()) {
             newInters.push(inner);
             newInterLaws.push(['SPEC', [(i + 1)]]);
-            console.log("SPEC on " + prem + " line " + (i + 1));
           }
           var attempt = prove(toProve, newPrems, newInters, newInterLaws, lineCounter, recurseCounter);
           if (attempt != false) {
+            //move the SPEC
+            for (let inner of sub) {
+              attempt[0].splice(idx, 1);
+              attempt[1].splice(idx, 1);
+              attempt[0].push(inner);
+              attempt[1].push(['SPEC', [(i + 1)]]);
+            }
             return attempt;
           }
         }
@@ -197,11 +199,13 @@ const Inference = new function() {
         var newInters = inters.concat();
         var newInterLaws = interLaws.concat();
         newInters.push(toProve);
-        newInterLaws.push(['SPEC', [lineCounter--]]);
+        console.log('spec');
+        console.log(lineCounter);
+        newInterLaws.push(['SPEC', [lineCounter]]);
         var newToProve = new AndExpression([toProve, variable]);
         newToProve.fromSpec = true;
         console.log('Try proving ' + newToProve);
-        var attempt = prove(newToProve, prems, newInters, newInterLaws, lineCounter, recurseCounter);
+        var attempt = prove(newToProve, prems, newInters, newInterLaws, lineCounter - 1, recurseCounter);
         if (attempt != false) {
           return attempt;
           break;
@@ -236,13 +240,13 @@ const Inference = new function() {
           resultBranches.push([result, i + 1]);
         }
       }
-      // for (var i = 0; i < inters.length; i++) {
-      //   var exp = inters[i];
-      //   var result = law.apply(toProve, exp);
-      //   if (result != false) {
-      //     resultBranches.push([result, -1 - i]);
-      //   }
-      // }
+      for (var i = 0; i < inters.length; i++) {
+        var exp = inters[i];
+        var result = law.apply(toProve, exp);
+        if (result != false) {
+          resultBranches.push([result, -1 - i]);
+        }
+      }
     }
     return resultBranches;
   };
