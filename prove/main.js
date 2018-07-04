@@ -116,12 +116,31 @@ function showSteps(steps) {
   }
   var inters = steps[0];
   var interLaws = steps[1];
+
+  var unusedPrems = Array.from({
+    length: Display.getNumPrems()
+  }, (x, y) => true);
+
   for (var i = 0; i < inters.length; i++) {
     //adding steps backwards
     var inter = inters[i];
     var interLaw = interLaws[i];
     Display.addStep(inter, interLaw);
+    if (unusedPrems.includes(true)) {
+      //check for unused prems
+      var lineNums = interLaw[1];
+      for (let line of lineNums) {
+        unusedPrems[line - 1] = false;
+      }
+    }
   }
+  var unused = [];
+  for (var i = 0; i < unusedPrems.length; i++) {
+    if (unusedPrems[i]) {
+      unused.push(i + 1);
+    }
+  }
+  Display.setUnused(unused);
   Display.setStepsVisible();
 }
 

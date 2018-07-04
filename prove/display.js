@@ -288,6 +288,33 @@ const Display = new function() {
     this.setHighlight([]);
   }
 
+  var prevUnusedLines = [];
+  this.setUnused = function(lineNums) {
+    //Reset old ones
+    for (let line of prevUnusedLines) {
+      var input = document.getElementById(getLineId(line)).getElementsByTagName('input')[0];
+      try {
+        input.classList.remove("unused");
+      } catch (e) {
+        console.log('Unused error: Line #' + line + " does not exist");
+      }
+    }
+    prevUnusedLines = [];
+    //Set new ones
+    for (let line of lineNums) {
+      var input = document.getElementById(getLineId(line)).getElementsByTagName('input')[0];
+      try {
+        input.classList.add("unused");
+        prevUnusedLines.push(line);
+      } catch (e) {
+        console.log('Unused error: Line #' + line + " does not exist");
+      }
+    }
+  }
+  this.clearUnused = function() {
+    this.setUnused([]);
+  }
+
   var getLineId = function(lineNum) {
     //returns predicateLineNum or stepLineNum
     if (lineNum > premiseCount) {
@@ -304,6 +331,7 @@ const Display = new function() {
       goButton.removeAttribute('hidden');
       backButton.setAttribute('hidden', '');
       Display.clearHighlight();
+      Display.clearUnused();
       goButton.focus();
     } else {
       goButton.setAttribute('hidden', '');
