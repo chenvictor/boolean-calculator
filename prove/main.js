@@ -15,7 +15,7 @@ function validate(input, wtoIdx) {
   clearTimeout(wtos[wtoIdx]);
   wtos[wtoIdx] = setTimeout(function() {
     //standardize
-    var value = Parser.standardize(input.value);
+    var value = Parser.standardize(input.value.toLowerCase());
     input.value = value;
   }, 500);
 }

@@ -51,7 +51,7 @@ function expressionChanged() {
   wto = setTimeout(function() {
     var expression = document.getElementById("expression").value;
     if (expression.length != 0) {
-      beginParse(expression);
+      beginParse(expression.toLowerCase());
     }
   }, 500);
 }

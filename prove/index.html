@@ -71,6 +71,10 @@
 
     /* CSS for Display UI */
 
+    input[type="text"] {
+      text-transform: lowercase;
+    }
+
     .fading {
       -webkit-mask-image: -webkit-gradient(linear, left top,
       left bottom, from(rgba(0, 0, 0, 1)), to(rgba(0, 0, 0, 0)));
@@ -153,6 +157,10 @@
           <input type="text" class="form-control" placeholder="conclusion" aria-label="Conclusion" oninput="validate(this, 0);" id="cInput">
           <button type="button" class="btn btn-primary" onclick="goClicked();" id="buttonProve">Go!</button>
           <button type="button" class="btn btn-secondary" onclick="backClicked();" id="buttonBack" hidden>Back</button>
+          <button type="button" class="btn" data-toggle="modal" data-target="#helpModal">Help</button>
+          <button type="button" class="btn" data-toggle="modal" data-target="#settingsModal">
+              <span class="fa fa-cog"></span>
+          </button>
         </div>
         <div class="collapse" id="collapseOutput">
           <div class="card card-body text-center" id="output">
@@ -160,8 +168,104 @@
         </div>
       </li>
     </ul>
-
   </div>
+
+  <!-- Modals -->
+  <!-- Help Modal -->
+  <div class="modal fade" id="helpModal" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="helpModalLabel">Help</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                  </button>
+        </div>
+        <div class="modal-body">
+          The calculator accepts the same expressions as the Simplification Calculator.
+          <hr>Likewise, T and F are reserved for Tautology and Contradiction. Any other variable letter names can be used.
+          <hr>Note that premises should be reasonably simplified. (eg. 'a' instead of 'a ∨ a') The calculator may not function properly, or perform suboptimally if expressions are not simplified.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal fade" id="settingsModal" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="helpModalLabel">Settings</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                  </button>
+        </div>
+        <div class="modal-body" style="height:300px; overflow-y: auto;">
+          The following rules are applied by the calculator
+          <table class="expressions">
+            <thead>
+              <tr>
+                <th scope="col" style="width:150px;" class="pr-3">Rule</th>
+                <th scope="col" class="pr-3">
+                  <a href="#" class="unlink" data-toggle="tooltip" title="'Accepted' abbreviation">Short</a>
+                  <input type="checkbox" data-toggle="tooltip" title="Use abbreviations instead of full names." id="short" onclick="Settings.toggleCheckbox(this)">
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td scope="row">Modus Ponens</td>
+                <td>M.PON</td>
+              </tr>
+              <tr>
+                <td scope="row">Modus Tollens</td>
+                <td>M.TOL</td>
+              </tr>
+              <tr>
+                <td scope="row">Generalization</td>
+                <td>GEN</td>
+              </tr>
+              <tr>
+                <td scope="row">Specialization</td>
+                <td>SPEC</td>
+              </tr>
+              <tr>
+                <td scope="row">Conjuction</td>
+                <td>CONJ</td>
+              </tr>
+              <tr>
+                <td scope="row">Elimination</td>
+                <td>ELIM</td>
+              </tr>
+              <tr>
+                <td scope="row">Transitivity</td>
+                <td>TRANS</td>
+              </tr>
+              <tr>
+                <td scope="row">Proof by cases</td>
+                <td>CASE</td>
+              </tr>
+              <tr>
+                <td scope="row">Resolution</td>
+                <td>RES</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          Logical Equivalency Laws from &nbsp;<a href="../resources/formulasheet.pdf" target="_blank">Dave's Formula Sheet</a>
+
+          <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="Settings.save()">Save</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+
   <!-- Share -->
   <div class="share-card" id="accordion">
     <div class="card">
@@ -199,11 +303,12 @@
   <script src="../js/utils.js?v=1.4"></script>
   <script src="main.js?v=1.0"></script>
   <script src="display.js?v=1.0"></script>
+  <script src="settings.js?v=1.0"></script>
   <script src="inference2.js?v=1.0"></script>
-  <!-- Enable Bootstrap Elements -->
+  <!-- Enable Tooltips -->
   <script>
     $(document).ready(function() {
-
+      $('[data-toggle="tooltip"]').tooltip();
     });
   </script>
 

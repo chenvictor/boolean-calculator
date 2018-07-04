@@ -139,10 +139,14 @@ const Inference2 = new function() {
           }
         }
         return false;
-      }
-      this.toString = function() {
-        return "M.PON";
-      }
+      };
+      this.toString = function(short = Settings.isShort()) {
+        if (short) {
+          return "M.PON";
+        } else {
+          return "Modus Ponens";
+        }
+      };
     }),
     (new function() {
       this.apply = function(line1, line2) {
@@ -153,10 +157,14 @@ const Inference2 = new function() {
           }
         }
         return false;
-      }
-      this.toString = function() {
-        return "M.TOL";
-      }
+      };
+      this.toString = function(short = Settings.isShort()) {
+        if (short) {
+          return "M.TOL";
+        } else {
+          return "Modus Tollens";
+        }
+      };
     }),
     (new function() {
       this.apply = function(line1, line2) {
@@ -168,10 +176,14 @@ const Inference2 = new function() {
           return false;
         }
         return andCombine(line1, line2);
-      }
-      this.toString = function() {
-        return "CONJ";
-      }
+      };
+      this.toString = function(short = Settings.isShort()) {
+        if (short) {
+          return "CONJ";
+        } else {
+          return "Conjuction";
+        }
+      };
     }),
     (new function() {
       this.apply = function(line1, line2) {
@@ -187,10 +199,14 @@ const Inference2 = new function() {
           }
         }
         return false;
-      }
-      this.toString = function() {
-        return "ELIM";
-      }
+      };
+      this.toString = function(short = Settings.isShort()) {
+        if (short) {
+          return "ELIM";
+        } else {
+          return "Elimination";
+        }
+      };
     }),
     (new function() {
       this.apply = function(line1, line2) {
@@ -205,10 +221,14 @@ const Inference2 = new function() {
           }
         }
         return false;
-      }
-      this.toString = function() {
-        return "TRANS";
-      }
+      };
+      this.toString = function(short = Settings.isShort()) {
+        if (short) {
+          return "TRANS";
+        } else {
+          return "Transitivity";
+        }
+      };
     }),
     (new function() {
       this.apply = function(line1, line2) {
@@ -220,10 +240,14 @@ const Inference2 = new function() {
           }
         }
         return false;
-      }
-      this.toString = function() {
-        return "CASE";
-      }
+      };
+      this.toString = function(short = Settings.isShort()) {
+        if (short) {
+          return "CASE";
+        } else {
+          return "Proof by cases";
+        }
+      };
     }),
     (new function() {
       this.apply = function(line1, line2) {
@@ -254,10 +278,14 @@ const Inference2 = new function() {
           }
         }
         return false;
-      }
-      this.toString = function() {
-        return "RES";
-      }
+      };
+      this.toString = function(short = Settings.isShort()) {
+        if (short) {
+          return "RES";
+        } else {
+          return "Resolution";
+        }
+      };
     })
   ];
 
@@ -287,10 +315,14 @@ const Inference2 = new function() {
           return toRet;
         }
         return false;
-      }
-      this.toString = function() {
-        return "GEN";
-      }
+      };
+      this.toString = function(short = Settings.isShort()) {
+        if (short) {
+          return "GEN";
+        } else {
+          return "Generalization";
+        }
+      };
     }),
     (new function() {
       this.apply = function(line) {
@@ -307,10 +339,14 @@ const Inference2 = new function() {
           return toRet;
         }
         return false;
-      }
-      this.toString = function() {
-        return "SPEC";
-      }
+      };
+      this.toString = function(short = Settings.isShort()) {
+        if (short) {
+          return "SPEC";
+        } else {
+          return "Specialization";
+        }
+      };
     })
   ];
 }
