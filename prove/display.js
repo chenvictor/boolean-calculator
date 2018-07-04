@@ -359,7 +359,8 @@ const Display = new function() {
 
   this.loadInputString = function(inputDict) {
     //set conclusion string
-    document.getElementById('conclusion').getElementsByTagName('input')[0].value = inputDict['c'];
+    var conc = document.getElementById('cInput')
+    conc.value = inputDict['c'];
     //set first premise string
     document.getElementById('premise1').getElementsByTagName('input')[0].value = inputDict['1'];
     //set any additional strings
@@ -367,5 +368,6 @@ const Display = new function() {
     while (inputDict.hasOwnProperty(premCount)) {
       this.addPremise(inputDict[premCount++]);
     }
+    conc.focus();
   };
 }

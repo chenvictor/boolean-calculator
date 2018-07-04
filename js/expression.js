@@ -173,6 +173,35 @@ OrExpression.prototype.equals = function(object) {
   if (!(object instanceof OrExpression)) {
     return false;
   }
+  //Check for generic
+  if (this.subs.includes(Generic)) {
+    if (object.subs.includes(Generic)) {
+      //both have ...
+      return true;
+    } else {
+      //this has ..., object doesn't
+      //check that all subs in this are in object
+      for (let sub of this.subs) {
+        if (!sub.equals(Generic)) {
+          if (!object.subs.includes(sub)) {
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+  } else if (object.subs.includes(Generic)) {
+    //object has generic, this doesn't
+    //check that all subs in object are in this
+    for (let sub of object.subs) {
+      if (!sub.equals(Generic)) {
+        if (!this.subs.includes(sub)) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
   if (this.subs.length != object.subs.length) {
     return false;
   }

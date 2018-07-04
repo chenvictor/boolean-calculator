@@ -5,7 +5,7 @@ const Inference = new function() {
    *  Inference3 attempts to prove statements by generating all lines, then selecting and returning the lines used.
    */
 
-  const MAX_DEPTH = 2;
+  const MAX_DEPTH = 200;
 
   this.prove = function(exps) {
     var toProve = exps.shift(); //Initial statement to prove
@@ -33,13 +33,15 @@ const Inference = new function() {
     let lastLine = allLines[0][allLines[0].length - 1];
     let lastLaw = allLines[1][allLines[0].length - 1];
     let toAdd = lastLaw[1];
-    var filtered = filterLines(prems.length, allLines, [lastLine], [lastLaw], toAdd);
+    var filtered = filterLines(prems.length, allLines, lastLine, lastLaw, toAdd);
     //return allLines;
-    var renumbered = renumberLines(filtered);
+    var renumbered = renumberLines(filtered, prems.length);
     return filtered;
   };
 
-  var filterLines = function(numPrems, allLines, lines, lineLaws, toAdd) {
+  var filterLines = function(numPrems, allLines, lastLine, lastLaw, toAdd) {
+    var lines = [];
+    var lineLaws = [];
     //returns only pertinent lines
     var originalLineNums = [];
     var lineCounter = -1;
@@ -54,34 +56,71 @@ const Inference = new function() {
           var line = allLines[0][item - 1 - numPrems];
           var law = allLines[1][item - 1 - numPrems];
           var lawLineNums = law[1];
-          originalLineNums.push(item);
-          lines.push(line); //line
-          lineLaws.push(law); //law
+          var idx = insertInOrder(originalLineNums, item);
+          lines.splice(idx, 0, line);
+          lineLaws.splice(idx, 0, law);
         }
       }
       toAdd = newToAdd.splice(0, newToAdd.length);
     }
+    lines.push(lastLine);
+    lineLaws.push(lastLaw);
     //length is 0
-    return [lines.reverse(), lineLaws.reverse(), originalLineNums.reverse()];
+    return [lines, lineLaws, originalLineNums];
   };
 
-  var renumberLines = function(filtered) {
-    console.log(filtered[2]);
-  }
-
-  var prove = function(toProve, prems, inters, interLaws, depth = 0) {
-    if (depth > MAX_DEPTH) {
-      var shouldCont = confirm("The calculator has not found a solution after " + MAX_DEPTH + " steps. Continue calculation?");
-      if (shouldCont) {
-        //reset depth
-        depth = 0;
-      } else {
-        return false;
+  var insertInOrder = function(array, item) {
+    //inserts item into the ordered array, returns index of insertion
+    for (var i = 0; i < array.length; i++) {
+      if (item < array[i]) {
+        array.splice(i - 2, 0, item);
+        return i - 2;
       }
     }
+    //Base case empty, or was never added
+    array.push(item);
+    return array.length;
+  }
+
+  var renumberLines = function(filtered, numPrems) {
+    console.log("The following list should be ordered");
+    console.log(filtered[2]);
+    var lineDict = {};
+    //generate dict
+    for (var i = 0; i < filtered[2].length; i++) {
+      lineDict[filtered[2][i]] = i + 1 + numPrems;
+    }
+    // console.log("Dict");
+    // console.log(lineDict);
+    //rename lines
+    for (var i = 0; i < filtered[1].length; i++) {
+      var lines = filtered[1][i][1];
+      for (var j = 0; j < lines.length; j++) {
+        var li = lines[j];
+        if (lineDict.hasOwnProperty(li)) {
+          lines[j] = lineDict[li];
+        }
+      }
+    }
+  }
+
+  var continueCheck = function(depth) {
+    depth++;
+    if (depth >= MAX_DEPTH) {
+      if (confirm("The calculator has not found a solution after " + MAX_DEPTH + " steps. Continue calculation?")) {
+        return 0;
+      } else {
+        return -1;
+      }
+    }
+    return depth;
+  }
+
+  var prove = function(toProve, prems, inters, interLaws, depth = 0, crawlStart = 0) {
+    var nextCrawlStart = prems.length + inters.length;
     //Iterate over all sets of lines
     var numLines = prems.length + inters.length;
-    for (var j = 0; j < numLines; j++) {
+    for (var j = crawlStart; j < numLines; j++) {
       for (var k = 0; k < numLines; k++) {
         var line1 = (j < prems.length ? prems[j] : inters[j - prems.length]);
         if (j == k) {
@@ -98,6 +137,11 @@ const Inference = new function() {
                     //first one to reach toProve is (one of) the least num steps
                     inters[inters.length - 1] = toProve;
                     return [inters, interLaws];
+                  } else {
+                    depth = continueCheck(depth);
+                    if (depth == -1) {
+                      return false;
+                    }
                   }
                 }
               }
@@ -121,13 +165,22 @@ const Inference = new function() {
               if (attempt.equals(toProve)) {
                 //first one to reach toProve is (one of) the least num steps
                 return [inters, interLaws];
+              } else {
+                if (!continueCheck(depth++)) {
+                  return false;
+                } else {
+                  depth = continueCheck(depth);
+                  if (depth == -1) {
+                    return false;
+                  }
+                }
               }
             }
           }
         }
       }
     }
-    return prove(toProve, prems, inters, interLaws, depth + 1);
+    return prove(toProve, prems, inters, interLaws, depth, nextCrawlStart);
   };
 
   var notIn = function(arrayOfInters, inter) {
@@ -323,11 +376,9 @@ const Inference = new function() {
           return toRet;
         } else if (line instanceof OrExpression) {
           var toRet = [];
-          for (let variable of VariableManager.getVariables()) {
-            if (!line.contains(variable) && !line.contains(negation(variable))) {
-              toRet.push(new OrExpression(Utils.setAdd(line.subs, [variable])));
-              toRet.push(new OrExpression(Utils.setAdd(line.subs, [negation(variable)])));
-            }
+          if (!line.subs.includes(Generic)) {
+            //if OrExpression doesn't contain Generic, add it, don't add to already generic ors
+            toRet.push(new OrExpression(Utils.setAdd(line.subs, [Generic])));
           }
           return toRet;
         }
