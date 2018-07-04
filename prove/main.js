@@ -23,13 +23,13 @@ function validate(input, wtoIdx) {
 var parsedExpressions;
 
 function goClicked() {
+  Display.showBackButton();
+  Display.setEditable(false);
   //parse all the expressions
   parsedExpressions = getParsed();
   if (!isValid(parsedExpressions)) {
     return;
   }
-  Display.showBackButton();
-  Display.setEditable(false);
   prove(parsedExpressions);
 }
 

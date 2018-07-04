@@ -5,6 +5,7 @@ const Inference2 = new function() {
    */
 
   const MAX_DEPTH = 50;
+  const MAX_BREADTH = 500;
 
   this.prove = function(exps) {
     console.clear();
@@ -31,7 +32,7 @@ const Inference2 = new function() {
 
   var prove = function(toProve, prems, allInters, allInterLaws, depth = 0) {
     if (depth > MAX_DEPTH) {
-      console.log("Too deep");
+      console.log("Too deep, ejecting");
       return false;
     }
     if (allInters.length == 0) {
@@ -72,6 +73,11 @@ const Inference2 = new function() {
                       }
                     }
                   }
+                  //If too many branches
+                  if (newAllInters.length > MAX_BREADTH) {
+                    return prove(toProve, prems, newAllInters, newAllInterLaws, depth + 1);
+                    //ignore the rest
+                  }
                 }
               }
             }
@@ -98,6 +104,12 @@ const Inference2 = new function() {
                     newAllInters.push(newInters);
                     newAllInterLaws.push(newInterLaws);
                   }
+                }
+
+                //If too many branches
+                if (newAllInters.length > MAX_BREADTH) {
+                  return prove(toProve, prems, newAllInters, newAllInterLaws, depth + 1);
+                  //ignore the rest
                 }
               }
             }
@@ -345,6 +357,35 @@ const Inference2 = new function() {
           return "SPEC";
         } else {
           return "Specialization";
+        }
+      };
+    }),
+    (new function() {
+      this.apply = function(line) {
+        if (line instanceof NotExpression) {
+          var type;
+          if (line.subs[0] instanceof OrExpression) {
+            type = AndExpression;
+          } else if (line.subs[0] instanceof AndExpression) {
+            type = OrExpression;
+          } else {
+            return false;
+          }
+          //negate all subs
+          var innerOr = line.subs[0];
+          var newSubs = [];
+          for (let inner of innerOr.subs) {
+            newSubs.push(negation(inner));
+          }
+          return [new type(newSubs)];
+        }
+        return false;
+      };
+      this.toString = function(short = Settings.isShort()) {
+        if (short) {
+          return "DM";
+        } else {
+          return "DeMorgan's";
         }
       };
     })
