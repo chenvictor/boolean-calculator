@@ -20,10 +20,28 @@ window.addEventListener("load", function() {
       $("#buttonSimplify").click();
     }
   });
+  //Set input
+  var match,
+    pl = /\+/g, // Regex for replacing addition symbol with a space
+    search = /([^&=]+)=?([^&]*)/g,
+    decode = function(s) {
+      return decodeURIComponent(s.replace(pl, " "));
+    },
+    query = window.location.search.substring(1);
+
+  urlParams = {};
+  while (match = search.exec(query)) {
+    urlParams[decode(match[1])] = decode(match[2]);
+  }
+  var input = urlParams['exp'];
+  if (input != null) {
+    Display.loadInputString(input);
+  }
 });
 
 function goClicked() {
   if (isGoButtonEnabled()) {
+    Display.setInputString();
     Display.clearSteps();
     var steps = Equivalency.simplify(parsedResult);
     if (steps.length == 0) {

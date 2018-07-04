@@ -1,4 +1,5 @@
 const Inference = new function() {
+  console.log("Inference v1");
 
   /*
    *  Inference attempts to prove statements elegantly by backtracking through inference laws

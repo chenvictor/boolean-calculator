@@ -1,15 +1,13 @@
 const Inference = new function() {
-  console.log("Inference v2");
+  console.log("Inference v3");
 
   /*
-   *  Inference2 attempts to prove statements through a graph breadth first traversal method.
+   *  Inference3 attempts to prove statements by generating all lines, then selecting and returning the lines used.
    */
 
-  const MAX_DEPTH = 50;
-  const MAX_BREADTH = 500;
+  const MAX_DEPTH = 2;
 
   this.prove = function(exps) {
-    console.clear();
     var toProve = exps.shift(); //Initial statement to prove
     var prems = exps.concat(); //Initial predicates
     var inters = []; //Intermediary steps used
@@ -28,97 +26,108 @@ const Inference = new function() {
         return [inters, interLaws];
       }
     }
-    return prove(toProve, prems, [inters], [interLaws]);
+    var allLines = prove(toProve, prems, inters, interLaws);
+    if (allLines == false) {
+      return false;
+    }
+    let lastLine = allLines[0][allLines[0].length - 1];
+    let lastLaw = allLines[1][allLines[0].length - 1];
+    let toAdd = lastLaw[1];
+    var filtered = filterLines(prems.length, allLines, [lastLine], [lastLaw], toAdd);
+    //return allLines;
+    var renumbered = renumberLines(filtered);
+    return filtered;
   };
 
-  var prove = function(toProve, prems, allInters, allInterLaws, depth = 0) {
+  var filterLines = function(numPrems, allLines, lines, lineLaws, toAdd) {
+    //returns only pertinent lines
+    var originalLineNums = [];
+    var lineCounter = -1;
+    while (toAdd.length > 0) {
+      var newToAdd = [];
+      for (let item of toAdd) {
+        if (item > numPrems && !originalLineNums.includes(item)) {
+          //not already added, add it
+          for (let newLine of allLines[1][item - 1 - numPrems][1]) {
+            newToAdd.push(newLine);
+          }
+          var line = allLines[0][item - 1 - numPrems];
+          var law = allLines[1][item - 1 - numPrems];
+          var lawLineNums = law[1];
+          originalLineNums.push(item);
+          lines.push(line); //line
+          lineLaws.push(law); //law
+        }
+      }
+      toAdd = newToAdd.splice(0, newToAdd.length);
+    }
+    //length is 0
+    return [lines.reverse(), lineLaws.reverse(), originalLineNums.reverse()];
+  };
+
+  var renumberLines = function(filtered) {
+    console.log(filtered[2]);
+  }
+
+  var prove = function(toProve, prems, inters, interLaws, depth = 0) {
     if (depth > MAX_DEPTH) {
-      console.log("Too deep, ejecting");
-      return false;
+      var shouldCont = confirm("The calculator has not found a solution after " + MAX_DEPTH + " steps. Continue calculation?");
+      if (shouldCont) {
+        //reset depth
+        depth = 0;
+      } else {
+        return false;
+      }
     }
-    if (allInters.length == 0) {
-      //empty basecase
-      return false;
-    }
-    var newAllInters = [];
-    var newAllInterLaws = [];
-    //Iterate over all allInters
-    for (var i = 0; i < allInters.length; i++) {
-      var inters = allInters[i];
-      var interLaws = allInterLaws[i];
-      //Iterate over all sets of lines
-      var numLines = prems.length + inters.length;
-      for (var j = 0; j < numLines; j++) {
-        for (var k = 0; k < numLines; k++) {
-          var line1 = (j < prems.length ? prems[j] : inters[j - prems.length]);
-          if (j == k) {
-            //Same line
-            //Use SingleLineInferenceLaws
-            for (let law of SingleLineInferenceLaws) {
-              var attempts = law.apply(line1);
-              if (attempts != false) {
-                for (let attempt of attempts) {
-                  if (!inters.includes(attempt)) {
-                    newInters = inters.concat();
-                    newInterLaws = interLaws.concat();
-                    newInters.push(attempt);
-                    newInterLaws.push([law.toString(), [j + 1]]);
-                    if (attempt.equals(toProve)) {
-                      //first one to reach toProve is (one of) the least num steps
-                      newInters[newInters.length - 1] = toProve;
-                      return [newInters, newInterLaws];
-                    } else {
-                      if (notIn(newAllInters, newInters)) {
-                        newAllInters.push(newInters);
-                        newAllInterLaws.push(newInterLaws);
-                      }
-                    }
-                  }
-                  //If too many branches
-                  if (newAllInters.length > MAX_BREADTH) {
-                    return prove(toProve, prems, newAllInters, newAllInterLaws, depth + 1);
-                    //ignore the rest
+    //Iterate over all sets of lines
+    var numLines = prems.length + inters.length;
+    for (var j = 0; j < numLines; j++) {
+      for (var k = 0; k < numLines; k++) {
+        var line1 = (j < prems.length ? prems[j] : inters[j - prems.length]);
+        if (j == k) {
+          //Same line
+          //Use SingleLineInferenceLaws
+          for (let law of SingleLineInferenceLaws) {
+            var attempts = law.apply(line1);
+            if (attempts != false) {
+              for (let attempt of attempts) {
+                if (!inters.includes(attempt)) {
+                  inters.push(attempt);
+                  interLaws.push([law.toString(), [j + 1]]);
+                  if (attempt.equals(toProve)) {
+                    //first one to reach toProve is (one of) the least num steps
+                    inters[inters.length - 1] = toProve;
+                    return [inters, interLaws];
                   }
                 }
               }
             }
-          } else {
-            //Diff line
-            var line2 = (k < prems.length ? prems[k] : inters[k - prems.length]);
-            if (line2.equals(line1)) {
-              //if duplicate lines exists, ignore
-              continue;
-            }
-            //Use DoubleLineInferenceLaws
-            for (let law of DoubleLineInferenceLaws) {
-              var attempt = law.apply(line1, line2);
-              if (attempt != false && !inters.includes(attempt)) {
-                newInters = inters.concat();
-                newInterLaws = interLaws.concat();
-                newInters.push(attempt);
-                newInterLaws.push([law.toString(), [j + 1, k + 1]]);
-                if (attempt.equals(toProve)) {
-                  //first one to reach toProve is (one of) the least num steps
-                  return [newInters, newInterLaws];
-                } else {
-                  if (notIn(newAllInters, newInters)) {
-                    newAllInters.push(newInters);
-                    newAllInterLaws.push(newInterLaws);
-                  }
-                }
-
-                //If too many branches
-                if (newAllInters.length > MAX_BREADTH) {
-                  return prove(toProve, prems, newAllInters, newAllInterLaws, depth + 1);
-                  //ignore the rest
-                }
+          }
+        } else {
+          //Diff line
+          var line2 = (k < prems.length ? prems[k] : inters[k - prems.length]);
+          if (line2.equals(line1)) {
+            //if duplicate lines exists, ignore
+            continue;
+          }
+          //Use DoubleLineInferenceLaws
+          for (let law of DoubleLineInferenceLaws) {
+            var attempt = law.apply(line1, line2);
+            if (attempt != false && !inters.includes(attempt)) {
+              inters = inters.concat();
+              interLaws = interLaws.concat();
+              inters.push(attempt);
+              interLaws.push([law.toString(), [j + 1, k + 1]]);
+              if (attempt.equals(toProve)) {
+                //first one to reach toProve is (one of) the least num steps
+                return [inters, interLaws];
               }
             }
           }
         }
       }
     }
-    return prove(toProve, prems, newAllInters, newAllInterLaws, depth + 1);
+    return prove(toProve, prems, inters, interLaws, depth + 1);
   };
 
   var notIn = function(arrayOfInters, inter) {
@@ -310,12 +319,7 @@ const Inference = new function() {
           var toRet = [];
           toRet.push(new IfExpression([Generic, line])); // p -> ... -> p
           toRet.push(new IfExpression([negation(line), Generic])); // p -> ~p -> ...
-          for (let variable of VariableManager.getVariables()) {
-            if (!variable.equals(line) && !equalsNegation(variable, line)) {
-              toRet.push(new OrExpression([line, variable])); // p -> p or ...
-              toRet.push(new OrExpression([line, negation(variable)])); // p -> p or not ...
-            }
-          }
+          toRet.push(new OrExpression([line, Generic]));
           return toRet;
         } else if (line instanceof OrExpression) {
           var toRet = [];

@@ -6,18 +6,20 @@ const Display = new function() {
     this.setGoButtonEnabled(false);
     this.preview("Preview...");
     this.variables();
-  }
+  };
 
   this.preview = function(text) {
     display(text, "preview");
-  }
+  };
+
   this.variables = function(varArray = true) {
     if (varArray == true) {
       display("", "variablePreview");
     } else {
       display("Variables: " + varArray, "variablePreview");
     }
-  }
+  };
+
   this.setGoButtonEnabled = function(enabled = true) {
     var btn = document.getElementById("buttonSimplify");
     if (enabled) {
@@ -25,7 +27,7 @@ const Display = new function() {
     } else {
       btn.setAttribute("disabled", "true");
     }
-  }
+  };
 
   this.setOutputVisible = function(visibility = true) {
     if (visibility) {
@@ -34,11 +36,11 @@ const Display = new function() {
       this.hideSteps();
       $('#collapseOutput').collapse('hide');
     }
-  }
+  };
 
   this.hideSteps = function() {
     $('#collapseSteps').collapse('hide');
-  }
+  };
 
   this.addStep = function(stepStatement, lawUsed) {
     incrementCounter();
@@ -50,20 +52,20 @@ const Display = new function() {
     badge.innerHTML = lawUsed;
     step.appendChild(badge);
     document.getElementById("listSteps").appendChild(step);
-  }
+  };
 
   this.clearSteps = function() {
     setNumSteps(0);
     display("", "listSteps");
-  }
+  };
 
   this.setResult = function(result) {
     display(result, "result");
-  }
+  };
 
   var incrementCounter = function() {
     setNumSteps(this.numSteps + 1);
-  }
+  };
 
   var setNumSteps = function(numSteps = 0) {
     this.numSteps = numSteps;
@@ -71,12 +73,22 @@ const Display = new function() {
     display(this.numSteps +
       (numSteps == 1 ? " Step" : " Steps"),
       "numSteps");
-  }
+  };
+
+  this.setInputString = function() {
+    var string = document.getElementById("expression").value;
+    window.history.pushState(null, null, window.location.href.split('?')[0] + "?exp=" + string);
+  };
+
+  this.loadInputString = function(string) {
+    document.getElementById("expression").value = string;
+    document.getElementById("expression").oninput();
+  };
 
   //Helper methods
   var display = function(text, elementId) {
     document.getElementById(elementId).innerHTML = text;
-  }
+  };
 }
 
 function isGoButtonEnabled() {

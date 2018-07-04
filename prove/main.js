@@ -5,6 +5,22 @@ window.addEventListener("load", function() {
       $("#buttonProve").click();
     }
   });
+  //Set input
+  var match,
+    pl = /\+/g, // Regex for replacing addition symbol with a space
+    search = /([^&=]+)=?([^&]*)/g,
+    decode = function(s) {
+      return decodeURIComponent(s.replace(pl, " "));
+    },
+    query = window.location.search.substring(1);
+
+  urlParams = {};
+  while (match = search.exec(query)) {
+    urlParams[decode(match[1])] = decode(match[2]);
+  }
+  if (urlParams["c"] != null) {
+    Display.loadInputString(urlParams);
+  }
 });
 
 
@@ -16,20 +32,22 @@ function validate(input, wtoIdx) {
   wtos[wtoIdx] = setTimeout(function() {
     //standardize
     var value = Parser.standardize(input.value.toLowerCase());
-    input.value = value;
+    input.value = value.split(' ').join('');
   }, 500);
 }
 
 var parsedExpressions;
 
 function goClicked() {
-  Display.showBackButton();
-  Display.setEditable(false);
+  Display.clearInputString();
   //parse all the expressions
   parsedExpressions = getParsed();
   if (!isValid(parsedExpressions)) {
     return;
   }
+  Display.showBackButton();
+  Display.setEditable(false);
+  Display.setInputString(parsedExpressions);
   prove(parsedExpressions);
 }
 
@@ -68,7 +86,7 @@ function isValid(parsedExpressions) {
     if (typeof(exp) == "string") {
       if (i == 0) {
         Display.error("Conclusion invalid: ", exp);
-        $("#cInput").focus();
+        document.getElementById("cInput").focus();
       } else {
         Display.error("Premise #" + i + " invalid: ", exp);
         document.getElementsByTagName('input')[i - 1].focus();
@@ -100,7 +118,7 @@ function prove(exps) {
   if (invalidatingAssignment == null) {
     Display.validArgument(premsContradict);
     if (!premsContradict) {
-      var steps = Inference2.prove(exps);
+      var steps = Inference.prove(exps);
       showSteps(steps);
     }
   } else {

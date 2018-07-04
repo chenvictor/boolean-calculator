@@ -12,7 +12,7 @@ const Display = new function() {
   this.getNumPrems = function() {
     return premiseCount;
   }
-  this.addPremise = function() {
+  this.addPremise = function(text = "") {
     if (!editable) {
       return; //do nothing
     }
@@ -26,6 +26,7 @@ const Display = new function() {
     prevInput.setAttribute('oninput', "validate(this)");
     prevInput.setAttribute('onkeydown', "Display.keyPress(this);");
     prevInput.setAttribute('data-prem', premiseCount);
+    prevInput.value = text;
     document.getElementById(ID_PREMS).appendChild(newPremiseFade());
   };
   var newPremiseFade = function() {
@@ -283,10 +284,11 @@ const Display = new function() {
         console.log('Highlight error: Line #' + line + " does not exist");
       }
     }
-  }
+  };
+
   this.clearHighlight = function() {
     this.setHighlight([]);
-  }
+  };
 
   var prevUnusedLines = [];
   this.setUnused = function(lineNums) {
@@ -310,10 +312,11 @@ const Display = new function() {
         console.log('Unused error: Line #' + line + " does not exist");
       }
     }
-  }
+  };
+
   this.clearUnused = function() {
     this.setUnused([]);
-  }
+  };
 
   var getLineId = function(lineNum) {
     //returns predicateLineNum or stepLineNum
@@ -322,7 +325,7 @@ const Display = new function() {
     } else {
       return ID_PREM + lineNum;
     }
-  }
+  };
 
   var setButton = function(isGo) {
     var goButton = document.getElementById('buttonProve');
@@ -338,5 +341,31 @@ const Display = new function() {
       backButton.removeAttribute('hidden');
       backButton.focus();
     }
-  }
+  };
+
+  this.clearInputString = function() {
+    window.history.pushState(null, null, window.location.href.split('?')[0]);
+  };
+
+  this.setInputString = function(parsedExpressions) {
+    var string = "?c=";
+    string += parsedExpressions[0];
+    for (let i = 1; i < parsedExpressions.length; i++) {
+      string += ("&" + i + "=" + parsedExpressions[i]);
+    }
+    string = string.split(' ').join('');
+    window.history.pushState(null, null, window.location.href.split('?')[0] + string);
+  };
+
+  this.loadInputString = function(inputDict) {
+    //set conclusion string
+    document.getElementById('conclusion').getElementsByTagName('input')[0].value = inputDict['c'];
+    //set first premise string
+    document.getElementById('premise1').getElementsByTagName('input')[0].value = inputDict['1'];
+    //set any additional strings
+    var premCount = 2;
+    while (inputDict.hasOwnProperty(premCount)) {
+      this.addPremise(inputDict[premCount++]);
+    }
+  };
 }
