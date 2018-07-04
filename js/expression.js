@@ -241,3 +241,45 @@ function negation(exp) {
     return new NotExpression([exp]);
   }
 }
+
+function andCombine(exp1, exp2) {
+  //Put two expressions under one AndExpression
+  if (exp1 instanceof AndExpression) {
+    if (exp2 instanceof AndExpression) {
+      //Both AndExpression
+      return new AndExpression(Utils.setAdd(exp1.subs, exp2.subs));
+    } else {
+      //exp1 AndExpression
+      return new AndExpression(Utils.setAdd(exp1.subs, [exp2]));
+    }
+  } else {
+    if (exp2 instanceof AndExpression) {
+      //exp2 AndExpression
+      return new AndExpression(Utils.setAdd(exp2.subs, [exp1]));
+    } else {
+      //Neither AndExpression
+      return new AndExpression([exp1, exp2]);
+    }
+  }
+}
+
+function orCombine(exp1, exp2) {
+  //Put two expressions under one OrExpression
+  if (exp1 instanceof OrExpression) {
+    if (exp2 instanceof OrExpression) {
+      //Both OrExpression
+      return new OrExpression(Utils.setAdd(exp1.subs, exp2.subs));
+    } else {
+      //exp1 OrExpression
+      return new OrExpression(Utils.setAdd(exp1.subs, [exp2]));
+    }
+  } else {
+    if (exp2 instanceof OrExpression) {
+      //exp2 OrExpression
+      return new OrExpression(Utils.setAdd(exp2.subs, [exp1]));
+    } else {
+      //Neither OrExpression
+      return new OrExpression([exp1, exp2]);
+    }
+  }
+}

@@ -100,7 +100,7 @@ function prove(exps) {
   if (invalidatingAssignment == null) {
     Display.validArgument(premsContradict);
     if (!premsContradict) {
-      var steps = Inference.prove(exps);
+      var steps = Inference2.prove(exps);
       showSteps(steps);
     }
   } else {
@@ -116,17 +116,10 @@ function showSteps(steps) {
   }
   var inters = steps[0];
   var interLaws = steps[1];
-  var totalLineCount = Display.getNumPrems() + inters.length;
-  for (var i = inters.length - 1; i >= 0; i--) {
+  for (var i = 0; i < inters.length; i++) {
     //adding steps backwards
     var inter = inters[i];
     var interLaw = interLaws[i];
-    var refNum = interLaw[1];
-    for (var j = 0; j < refNum.length; j++) {
-      if (refNum[j] < 0) {
-        refNum[j] += totalLineCount;
-      }
-    }
     Display.addStep(inter, interLaw);
   }
   Display.setStepsVisible();

@@ -1,4 +1,9 @@
 const Inference = new function() {
+
+  /*
+   *  Inference attempts to prove statements elegantly by backtracking through inference laws
+   */
+
   this.prove = function(exps) {
     console.clear();
     //exps[0] is conclusion
@@ -11,7 +16,28 @@ const Inference = new function() {
     var recurseCounter = 0;
 
     //Initialize helper function
-    return prove(toProve, prems, inters, interLaws, lineCounter, recurseCounter);
+    var reverseSteps = prove(toProve, prems, inters, interLaws, lineCounter, recurseCounter);
+    var inters = reverseSteps[0];
+    var interLaws = reverseSteps[1];
+    var totalLineCount = Display.getNumPrems() + inters.length;
+    var steps = [
+      [],
+      []
+    ];
+    for (var i = inters.length - 1; i >= 0; i--) {
+      //adding steps backwards
+      var inter = inters[i];
+      var interLaw = interLaws[i];
+      var refNum = interLaw[1];
+      for (var j = 0; j < refNum.length; j++) {
+        if (refNum[j] < 0) {
+          refNum[j] += totalLineCount;
+        }
+      }
+      steps[0].push(inter);
+      steps[1].push(interLaw);
+    }
+    return steps;
   };
   var prove = function(toProve, prems, inters, interLaws, lineCounter, recurseCounter) {
     if (recurseCounter++ > 50) {

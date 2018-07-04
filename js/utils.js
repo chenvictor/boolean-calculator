@@ -60,6 +60,15 @@ const Utils = new function() {
     }
     return newArray;
   };
+  this.setAdd = function(main, add) {
+    var newArray = main.concat();
+    for (let a of add) {
+      if (!main.includes(a)) {
+        newArray.push(a);
+      }
+    }
+    return newArray;
+  }
 
   //return an array of possible subdivisions of an array, with most simple first
   this.subdivisions = function(array) {
@@ -67,6 +76,9 @@ const Utils = new function() {
       throw "Input is not an Array!";
     }
     //most simple if 2 elementAndExp
+    if (array.length == 0) {
+      throw "Input array length = 0";
+    }
     if (array.length == 1) {
       //base case
       return [
