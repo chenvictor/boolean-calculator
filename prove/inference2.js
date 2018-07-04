@@ -63,6 +63,7 @@ const Inference2 = new function() {
                     newInterLaws.push([law.toString(), [j + 1]]);
                     if (attempt.equals(toProve)) {
                       //first one to reach toProve is (one of) the least num steps
+                      newInters[newInters.length - 1] = toProve;
                       return [newInters, newInterLaws];
                     } else {
                       if (notIn(newAllInters, newInters)) {
@@ -266,10 +267,12 @@ const Inference2 = new function() {
         //Only apply to variables and OrExpression
         if (line instanceof Variable) {
           var toRet = [];
+          toRet.push(new IfExpression([Generic, line])); // p -> ... -> p
+          toRet.push(new IfExpression([negation(line), Generic])); // p -> ~p -> ...
           for (let variable of VariableManager.getVariables()) {
             if (!variable.equals(line) && !equalsNegation(variable, line)) {
-              toRet.push(new OrExpression([line, variable]));
-              toRet.push(new OrExpression([line, negation(variable)]));
+              toRet.push(new OrExpression([line, variable])); // p -> p or ...
+              toRet.push(new OrExpression([line, negation(variable)])); // p -> p or not ...
             }
           }
           return toRet;

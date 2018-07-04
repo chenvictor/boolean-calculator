@@ -1,4 +1,18 @@
 //Unary Expressions
+const Generic = new function() {
+  this.toString = function() {
+    return "...";
+  }
+  this.equals = function(object) {
+    return true;
+  }
+  this.clone = function() {
+    return this;
+  }
+  this.evaluate = function(variableStates) {
+    throw "Operation: evalute not supported.";
+  }
+}
 const True = new function() {
   this.toString = function() {
     return "T";
