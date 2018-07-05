@@ -5,7 +5,7 @@ const Inference = new function() {
    *  Inference3 attempts to prove statements by generating all lines, then selecting and returning the lines used.
    */
 
-  var MAX_DEPTH = 100;
+  var MAX_DEPTH = 200;
 
   this.prove = function(exps) {
     MAX_DEPTH = Settings.getMAX_DEPTH();
@@ -118,11 +118,11 @@ const Inference = new function() {
   var prove = function(toProve, prems, inters, interLaws, depth = 0, crawlStart = 0) {
     while (true) {
       var nextCrawlStart = prems.length + inters.length;
-      if (crawlStart == nextCrawlStart) {
-        //no new inters generated
-        alert("Could not be proven through. Check that premises have been simplified.");
-        return false;
-      }
+      // if (crawlStart == nextCrawlStart) {
+      //   //no new inters generated
+      //   alert("Could not be proven through. Check that premises have been simplified.");
+      //   return false;
+      // }
       //Iterate over all sets of lines
       var numLines = prems.length + inters.length;
       for (var j = crawlStart; j < numLines; j++) {
@@ -182,7 +182,7 @@ const Inference = new function() {
           }
         }
       }
-      crawlStart = nextCrawlStart;
+      //crawlStart = nextCrawlStart;
     }
   };
 
