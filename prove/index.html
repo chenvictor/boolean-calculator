@@ -204,7 +204,9 @@
                   </button>
         </div>
         <div class="modal-body" style="height:300px; overflow-y: auto;">
-          The following rules are applied by the calculator
+
+          <a href="#" class="unlink" data-toggle="tooltip" title="Number of steps before prompting the user to continue.">MAX_DEPTH</a><input class="form-control " id="inputMAX_DEPTH" type="number" min="1" value="100" oninput="Settings.depthInput(this);">
+          <hr> The following rules are applied by the calculator
           <table class="expressions">
             <thead>
               <tr>

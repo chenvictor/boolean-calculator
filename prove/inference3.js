@@ -5,9 +5,10 @@ const Inference = new function() {
    *  Inference3 attempts to prove statements by generating all lines, then selecting and returning the lines used.
    */
 
-  const MAX_DEPTH = 200;
+  var MAX_DEPTH = 100;
 
   this.prove = function(exps) {
+    MAX_DEPTH = Settings.getMAX_DEPTH();
     var toProve = exps.shift(); //Initial statement to prove
     var prems = exps.concat(); //Initial predicates
     var inters = []; //Intermediary steps used
@@ -83,8 +84,6 @@ const Inference = new function() {
   }
 
   var renumberLines = function(filtered, numPrems) {
-    console.log("The following list should be ordered");
-    console.log(filtered[2]);
     var lineDict = {};
     //generate dict
     for (var i = 0; i < filtered[2].length; i++) {
@@ -117,57 +116,61 @@ const Inference = new function() {
   }
 
   var prove = function(toProve, prems, inters, interLaws, depth = 0, crawlStart = 0) {
-    var nextCrawlStart = prems.length + inters.length;
-    //Iterate over all sets of lines
-    var numLines = prems.length + inters.length;
-    for (var j = crawlStart; j < numLines; j++) {
-      for (var k = 0; k < numLines; k++) {
-        var line1 = (j < prems.length ? prems[j] : inters[j - prems.length]);
-        if (j == k) {
-          //Same line
-          //Use SingleLineInferenceLaws
-          for (let law of SingleLineInferenceLaws) {
-            var attempts = law.apply(line1);
-            if (attempts != false) {
-              for (let attempt of attempts) {
-                if (!inters.includes(attempt)) {
-                  inters.push(attempt);
-                  interLaws.push([law.toString(), [j + 1]]);
-                  if (attempt.equals(toProve)) {
-                    //first one to reach toProve is (one of) the least num steps
-                    inters[inters.length - 1] = toProve;
-                    return [inters, interLaws];
-                  } else {
-                    depth = continueCheck(depth);
-                    if (depth == -1) {
-                      return false;
+    while (true) {
+      var nextCrawlStart = prems.length + inters.length;
+      if (crawlStart == nextCrawlStart) {
+        //no new inters generated
+        alert("Could not be proven through. Check that premises have been simplified.");
+        return false;
+      }
+      //Iterate over all sets of lines
+      var numLines = prems.length + inters.length;
+      for (var j = crawlStart; j < numLines; j++) {
+        for (var k = 0; k < numLines; k++) {
+          var line1 = (j < prems.length ? prems[j] : inters[j - prems.length]);
+          if (j == k) {
+            //Same line
+            //Use SingleLineInferenceLaws
+            for (let law of SingleLineInferenceLaws) {
+              var attempts = law.apply(line1);
+              if (attempts != false) {
+                for (let attempt of attempts) {
+                  if (!inters.includes(attempt)) {
+                    inters.push(attempt);
+                    interLaws.push([law.toString(), [j + 1]]);
+                    if (attempt.equals(toProve)) {
+                      //first one to reach toProve is (one of) the least num steps
+                      inters[inters.length - 1] = toProve;
+                      return [inters, interLaws];
+                    } else {
+                      depth = continueCheck(depth);
+                      if (depth == -1) {
+                        return false;
+                      }
                     }
                   }
                 }
               }
             }
-          }
-        } else {
-          //Diff line
-          var line2 = (k < prems.length ? prems[k] : inters[k - prems.length]);
-          if (line2.equals(line1)) {
-            //if duplicate lines exists, ignore
-            continue;
-          }
-          //Use DoubleLineInferenceLaws
-          for (let law of DoubleLineInferenceLaws) {
-            var attempt = law.apply(line1, line2);
-            if (attempt != false && !inters.includes(attempt)) {
-              inters = inters.concat();
-              interLaws = interLaws.concat();
-              inters.push(attempt);
-              interLaws.push([law.toString(), [j + 1, k + 1]]);
-              if (attempt.equals(toProve)) {
-                //first one to reach toProve is (one of) the least num steps
-                return [inters, interLaws];
-              } else {
-                if (!continueCheck(depth++)) {
-                  return false;
+          } else {
+            //Diff line
+            var line2 = (k < prems.length ? prems[k] : inters[k - prems.length]);
+            if (line2.equals(line1)) {
+              //if duplicate lines exists, ignore
+              continue;
+            }
+            //Use DoubleLineInferenceLaws
+            for (let law of DoubleLineInferenceLaws) {
+              var attempt = law.apply(line1, line2);
+              if (attempt != false && !inters.includes(attempt)) {
+                inters = inters.concat();
+                interLaws = interLaws.concat();
+                inters.push(attempt);
+                interLaws.push([law.toString(), [j + 1, k + 1]]);
+                if (attempt.equals(toProve)) {
+                  //first one to reach toProve is (one of) the least num steps
+                  inters[inters.length - 1] = toProve;
+                  return [inters, interLaws];
                 } else {
                   depth = continueCheck(depth);
                   if (depth == -1) {
@@ -179,8 +182,8 @@ const Inference = new function() {
           }
         }
       }
+      crawlStart = nextCrawlStart;
     }
-    return prove(toProve, prems, inters, interLaws, depth, nextCrawlStart);
   };
 
   var notIn = function(arrayOfInters, inter) {
@@ -309,7 +312,7 @@ const Inference = new function() {
       this.apply = function(line1, line2) {
         if (line1 instanceof IfExpression) {
           if (line2 instanceof IfExpression) {
-            if (line1.subs[1].equals(line2.subs[1])) {
+            if (line1.subs[1].equals(line2.subs[1]) && line1.subs[1] != Generic && line2.subs[1] != Generic) {
               return new IfExpression([orCombine(line1.subs[0], line2.subs[0]), line1.subs[1]]);
             }
           }
